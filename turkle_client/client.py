@@ -68,7 +68,9 @@ class Client:
             if 'detail' in data:
                 raise ValueError(data['detail'])
             else:
-                raise ValueError(next(iter(data.items()))[1])
+                # grab the first error
+                parts = next(iter(data.items()))
+                raise ValueError(f"{parts[0]} - {parts[1][0]}")
 
 
 class Users(Client):
