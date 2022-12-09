@@ -6,6 +6,7 @@ import sys
 import appdirs
 
 from .client import Batches, Groups, Permissions, Projects, Users
+from .wrappers import GroupsWrapper, UsersWrapper
 
 config_choices = ['token', 'url']
 config_help = """token  Set the API token
@@ -143,9 +144,14 @@ class Cmd:
             raise ValueError("url not specified")
 
         # construct the class and method from the command and subcommand
-        client_class = getattr(sys.modules[__name__], args.command.capitalize())
-        client = client_class(args.url, args.token)
-        print(getattr(client, args.subcommand)(**vars(args)))
+        client = self.construct_client(args.command.capitalize(), args.url, args.token)
+        print(getattr(client, args.subcommand)(**vars(args)), end='')
+
+    def construct_client(self, name, url, token):
+        client_class = getattr(sys.modules[__name__], name)
+        client = client_class(url, token)
+        wrapper_class = getattr(sys.modules[__name__], name + 'Wrapper')
+        return wrapper_class(client)
 
     @property
     def config_dir(self):
@@ -172,10 +178,10 @@ class Cmd:
 
 
 def main():
-    try:
+    #try:
         Cmd().dispatch()
-    except Exception as e:
-        print(f"Error: {e}")
+    #except Exception as e:
+    #    print(f"Error: {e}")
 
 
 if __name__ == '__main__':
