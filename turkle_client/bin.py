@@ -25,11 +25,14 @@ update    Update projects
 batches   List batches for a project
 """
 
-batches_choices = ['list', 'create', 'retrieve', 'update']
+batches_choices = ['list', 'create', 'retrieve', 'update', 'input', 'results', 'progress']
 batches_help = """list      List all batches as jsonl
 create    Create new batches
 retrieve  Retrieve a batch based on integer identifier
 update    Update batches
+input     Download the input CSV
+results   Download the current results CSV
+progress  Get current progress information
 """
 
 perm_choices = ['retrieve', 'add', 'replace']

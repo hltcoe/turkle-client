@@ -222,6 +222,9 @@ class Batches(Client):
     class Urls:
         list = "{base}/api/batches/"
         detail = "{base}/api/batches/{id}/"
+        input = "{base}/api/batches/{id}/input/"
+        results = "{base}/api/batches/{id}/results/"
+        progress = "{base}/api/batches/{id}/progress/"
 
     def list(self, **kwargs):
         url = self.Urls.list.format(base=self.base_url)
@@ -260,6 +263,27 @@ class Batches(Client):
                 self.patch(url, data)
                 count += 1
         return f"{plural(count, 'batch', 'batches')} updated"
+
+    def input(self, id=None, **kwargs):
+        if not id:
+            raise ValueError(f"--id must be set for 'batches input'")
+        url = self.Urls.input.format(base=self.base_url, id=id)
+        response = self.get(url)
+        return response.text
+
+    def results(self, id=None, **kwargs):
+        if not id:
+            raise ValueError(f"--id must be set for 'batches results'")
+        url = self.Urls.results.format(base=self.base_url, id=id)
+        response = self.get(url)
+        return response.text
+
+    def progress(self, id=None, **kwargs):
+        if not id:
+            raise ValueError(f"--id must be set for 'batches progress'")
+        url = self.Urls.progress.format(base=self.base_url, id=id)
+        response = self.get(url)
+        return response.text
 
 
 class Permissions(Client):
