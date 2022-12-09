@@ -17,11 +17,12 @@ retrieve  Retrieve a group selected by name or integer identifier
 addusers  Add users to an existing group by passing their ids
 """
 
-projects_choices = ['list', 'create', 'retrieve', 'update']
+projects_choices = ['list', 'create', 'retrieve', 'update', 'batches']
 projects_help = """list      List all projects as jsonl
 create    Create new projects
 retrieve  Retrieve a project based on integer identifier
 update    Update projects
+batches   List batches for a project
 """
 
 batches_choices = ['list', 'create', 'retrieve', 'update']
@@ -74,7 +75,7 @@ class Cmd:
         )
         self.update_title(projects_parser)
         projects_parser.add_argument('subcommand', choices=projects_choices, help=projects_help)
-        projects_parser.add_argument('--id', help='Project id - required for retrieve')
+        projects_parser.add_argument('--id', help='Project id - required for retrieve and batches')
         projects_parser.add_argument('--file', help='Jsonl file - required for create or update')
 
         batches_parser = subparsers.add_parser(

@@ -166,6 +166,7 @@ class Projects(Client):
     class Urls:
         list = "{base}/api/projects/"
         detail = "{base}/api/projects/{id}/"
+        batches = "{base}/api/projects/{id}/batches/"
 
     def list(self, **kwargs):
         url = self.Urls.list.format(base=self.base_url)
@@ -209,6 +210,12 @@ class Projects(Client):
                 self.patch(url, data)
                 count += 1
         return f"{plural(count, 'project', 'projects')} updated"
+
+    def batches(self, id=None, **kwargs):
+        if not id:
+            raise ValueError("--id must be set for 'projects batches'")
+        url = self.Urls.batches.format(base=self.base_url, id=id)
+        return self.walk(url)
 
 
 class Batches(Client):
