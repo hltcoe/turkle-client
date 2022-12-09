@@ -1,7 +1,16 @@
 import argparse
+import json
+import os.path
 import sys
 
+import appdirs
+
 from .client import Batches, Groups, Permissions, Projects, Users
+
+config_choices = ['token', 'url']
+config_help = """token  Set the API token
+url    Set the base URL for the Turkle site. Ex: http://localhost:8000/ 
+"""
 
 users_choices = ['list', 'create', 'retrieve', 'update']
 users_help = """list      List all users as jsonl
@@ -45,9 +54,19 @@ replace   Replace a project's or batch's permissions
 class Cmd:
     def __init__(self):
         self.parser = argparse.ArgumentParser(description='Turkle client help')
-        self.parser.add_argument('--token', help='API token')
+        self.parser.add_argument('-t', '--token', help='API token')
+        self.parser.add_argument('-u', '--url', help='Base URL for the Turkle site')
         self.update_title(self.parser, 'Object command')
         subparsers = self.parser.add_subparsers(dest='command')
+
+        config_parser = subparsers.add_parser(
+            'config',
+            help='Set the token or url in the config.',
+            formatter_class=argparse.RawTextHelpFormatter
+        )
+        self.update_title(config_parser, 'Parameter')
+        config_parser.add_argument('subcommand', choices=config_choices, help=config_help)
+        config_parser.add_argument('value', help='The value to set for the parameter')
 
         users_parser = subparsers.add_parser(
             'users',
@@ -108,9 +127,48 @@ class Cmd:
 
     def dispatch(self):
         args = self.parser.parse_args()
+
+        if args.command == 'config':
+            self.set_config(args.subcommand, args.value)
+            print(f"{args.subcommand} set to {args.value}")
+            return
+
+        # load config but default to command line arguments
+        config = self.load_config()
+        args.token = args.token if args.token else config.get('token', None)
+        args.url = args.url if args.url else config.get('url', None)
+        if not args.token:
+            raise ValueError("token not specified")
+        if not args.url:
+            raise ValueError("url not specified")
+
+        # construct the class and method from the command and subcommand
         client_class = getattr(sys.modules[__name__], args.command.capitalize())
-        client = client_class("http://localhost:8000/", args.token)
+        client = client_class(args.url, args.token)
         print(getattr(client, args.subcommand)(**vars(args)))
+
+    @property
+    def config_dir(self):
+        return appdirs.user_config_dir('turkle-client', 'HLTCOE')
+
+    @property
+    def config_file(self):
+        return os.path.join(self.config_dir, 'config.json')
+
+    def load_config(self):
+        if os.path.exists(self.config_file):
+            with open(self.config_file, 'r') as fh:
+                config = json.load(fh)
+                return config
+        else:
+            return {}
+
+    def set_config(self, parameter, value):
+        config = self.load_config()
+        config[parameter] = value
+        os.makedirs(self.config_dir, exist_ok=True)
+        with open(self.config_file, 'w') as fh:
+            json.dump(config, fh)
 
 
 def main():
