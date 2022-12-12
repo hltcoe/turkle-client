@@ -25,13 +25,39 @@ class Client:
         self.headers = {'Authorization': f'TOKEN {token}'}
 
     def list(self):
-        """List all instances
+        """List all instances (user, group, project, batch)
 
         Returns:
             str: jsonl where each line is an object
         """
         url = self.Urls.list.format(base=self.base_url)
         return self._walk(url)
+
+    def retrieve(self, instance_id):
+        """Retrieve an instance from an id (user, group, project, batch)
+
+        Args:
+            instance_id (int): Instance id
+
+        Returns:
+            str: instance encoded as json
+        """
+        url = self.Urls.detail.format(base=self.base_url, id=instance_id)
+        response = self._get(url)
+        return response.text
+
+    def create(self, instance):
+        """Create an instance (user, group, project, batch)
+
+        Args:
+            instance (dict): Instance fields as dict
+
+        Returns:
+            str: json representation of the created instance
+        """
+        url = self.Urls.list.format(base=self.base_url)
+        response = self._post(url, instance)
+        return response.text
 
     def _walk(self, url,  **kwargs):
         jsonl = io.StringIO()
@@ -52,7 +78,7 @@ class Client:
                 self._handle_errors(response)
             return response
         except requests.exceptions.ConnectionError:
-            raise ValueError(f"Unable to connect to {self.base_url}")
+            raise TurkleClientException(f"Unable to connect to {self.base_url}")
 
     def _post(self, url, data, *args, **kwargs):
         try:
@@ -61,7 +87,7 @@ class Client:
                 self._handle_errors(response)
             return response
         except requests.exceptions.ConnectionError:
-            raise ValueError(f"Unable to connect to {self.base_url}")
+            raise TurkleClientException(f"Unable to connect to {self.base_url}")
 
     def _patch(self, url, data, *args, **kwargs):
         try:
@@ -70,7 +96,7 @@ class Client:
                 self._handle_errors(response)
             return response
         except requests.exceptions.ConnectionError:
-            raise ValueError(f"Unable to connect to {self.base_url}")
+            raise TurkleClientException(f"Unable to connect to {self.base_url}")
 
     def _put(self, url, data, *args, **kwargs):
         try:
@@ -79,17 +105,17 @@ class Client:
                 self._handle_errors(response)
             return response
         except requests.exceptions.ConnectionError:
-            raise ValueError(f"Unable to connect to {self.base_url}")
+            raise TurkleClientException(f"Unable to connect to {self.base_url}")
 
     def _handle_errors(self, response):
         data = response.json()
         if data:
             if 'detail' in data:
-                raise ValueError(data['detail'])
+                raise TurkleClientException(data['detail'])
             else:
                 # grab the first error
                 parts = next(iter(data.items()))
-                raise ValueError(f"{parts[0]} - {parts[1][0]}")
+                raise TurkleClientException(f"{parts[0]} - {parts[1][0]}")
 
 
 class Users(Client):
@@ -98,55 +124,43 @@ class Users(Client):
         detail = "{base}/api/users/{id}/"
         username = "{base}/api/users/username/{username}/"
 
-    def retrieve(self, id=None, username=None):
-        """Retrieve a user using id or username
+    def retrieve_by_username(self, username):
+        """Retrieve a user from a username
 
         Args:
-            id (int): User id
             username (str): Username
         Returns:
             str: user object as json
         """
-        if id:
-            url = self.Urls.detail.format(base=self.base_url, id=id)
-        elif username:
-            url = self.Urls.username.format(base=self.base_url, username=username)
-        else:
-            raise TurkleClientException("id or username must be passed")
+        url = self.Urls.username.format(base=self.base_url, username=username)
         response = self._get(url)
         return response.text
 
-    def create(self, users):
-        """Create users
+    def create(self, user):
+        """Create a user
 
         Args:
-            users (list): List of user object dictionaries
+            user (dict): User fields as dict
 
         Returns:
-            str: jsonl where each line is a created user
+            str: json representation of the created user
         """
         url = self.Urls.list.format(base=self.base_url)
-        text = ''
-        for user in users:
-            response = self._post(url, user)
-            text += response.text + '\n'
-        return text
+        response = self._post(url, user)
+        return response.text
 
-    def update(self, users):
-        """Update users
+    def update(self, user):
+        """Update a user
 
         Args:
-            users (list): List of user object dictionaries with ids
+            user (dict): User fields as dict including id
 
         Returns:
-            str: jsonl where each line is an updated user
+            str: json representation of the updated user
         """
-        text = ''
-        for user in users:
-            url = self.Urls.detail.format(base=self.base_url, id=user['id'])
-            response = self._patch(url, user)
-            text += response.text + '\n'
-        return text
+        url = self.Urls.detail.format(base=self.base_url, id=user['id'])
+        response = self._patch(url, user)
+        return response.text
 
 
 class Groups(Client):
@@ -156,41 +170,17 @@ class Groups(Client):
         name = "{base}/api/groups/name/{name}/"
         addusers = "{base}/api/groups/{id}/users/"
 
-    def retrieve(self, id=None, name=None):
-        """Retrieve a group(s) using id or name
+    def retrieve_by_name(self, name):
+        """Retrieve groups from a name
 
         Args:
-            id (int): Group id
             name (str): Group name
 
         Returns:
-            str: single line if using id and one or more lines if name
+            str: jsonl with each line being a group that has that name
         """
-        if id:
-            url = self.Urls.detail.format(base=self.base_url, id=id)
-            response = self._get(url)
-            return response.text
-        elif name:
-            url = self.Urls.name.format(base=self.base_url, name=name)
-            return self._walk(url)
-        else:
-            raise TurkleClientException("id or name must be passed")
-
-    def create(self, groups):
-        """Create groups
-
-        Args:
-            groups (list): List of group object dictionaries
-
-        Returns:
-            str: jsonl where each line is a created group
-        """
-        url = self.Urls.list.format(base=self.base_url)
-        text = ''
-        for group in groups:
-            response = self._post(url, group)
-            text += response.text + '\n'
-        return text
+        url = self.Urls.name.format(base=self.base_url, name=name)
+        return self._walk(url)
 
     def addusers(self, group_id, user_ids, **kwargs):
         """Add users to a group
@@ -214,50 +204,31 @@ class Projects(Client):
         detail = "{base}/api/projects/{id}/"
         batches = "{base}/api/projects/{id}/batches/"
 
-    def retrieve(self, id):
-        """Retrieve a project using id
+    def create(self, project):
+        """Create a project
 
         Args:
-            id (int): project id
+            project (dict): Project fields as a dict
 
         Returns:
-            str: project encoded as json
-        """
-        url = self.Urls.detail.format(base=self.base_url, id=id)
-        response = self._get(url)
-        return response.text
-
-    def create(self, projects):
-        """Create projects
-
-        Args:
-            projects (list): List of project object dictionaries
-
-        Returns:
-            str: jsonl where each line is a created project
+            str: json representation of the created project
         """
         url = self.Urls.list.format(base=self.base_url)
-        text = ''
-        for project in projects:
-            response = self._post(url, project)
-            text += response.text + '\n'
-        return text
+        response = self._post(url, project)
+        return response.text
 
-    def update(self, projects):
-        """Update projects
+    def update(self, project):
+        """Update a project
 
         Args:
-            projects (list): List of project object dictionaries with ids
+            project (dict): Project fields including the id
 
         Returns:
-            str: jsonl where each line is an updated project
+            str: json representation of the updated project
         """
-        text = ''
-        for project in projects:
-            url = self.Urls.detail.format(base=self.base_url, id=project['id'])
-            response = self._patch(url, project)
-            text += response.text + '\n'
-        return text
+        url = self.Urls.detail.format(base=self.base_url, id=project['id'])
+        response = self._patch(url, project)
+        return response.text
 
     def batches(self, id):
         """List all batches for a project
@@ -277,52 +248,33 @@ class Batches(Client):
         results = "{base}/api/batches/{id}/results/"
         progress = "{base}/api/batches/{id}/progress/"
 
-    def retrieve(self, id):
-        """Retrieve a batch using id
+    def create(self, batch):
+        """Create a batch
 
         Args:
-            id (int): batch id
+            batch (dict): Batch fields as a dict
 
         Returns:
-            str: batch encoded as json
-        """
-        url = self.Urls.detail.format(base=self.base_url, id=id)
-        response = self._get(url)
-        return response.text
-
-    def create(self, batches):
-        """Create batches
-
-        Args:
-            batches (list): List of batch object dictionaries
-
-        Returns:
-            str: jsonl where each line is a created batch
+            str: json representation of the created batch
         """
         url = self.Urls.list.format(base=self.base_url)
-        text = ''
-        for batch in batches:
-            response = self._post(url, batch)
-            text += response.text + '\n'
-        return text
+        response = self._post(url, batch)
+        return response.text
 
-    def update(self, batches):
-        """Update batches
+    def update(self, batch):
+        """Update a batch
 
         Cannot update the CSV data. See addtasks to add additional tasks.
 
         Args:
-            batches (list): List of batch object dictionaries with ids
+            batch (dict): Batch fields as a dict including the id
 
         Returns:
-            str: jsonl where each line is an updated batch
+            str: json representations of the updated batch
         """
-        text = ''
-        for batch in batches:
-            url = self.Urls.detail.format(base=self.base_url, id=batch['id'])
-            response = self._patch(url, batch)
-            text += response.text + '\n'
-        return text
+        url = self.Urls.detail.format(base=self.base_url, id=batch['id'])
+        response = self._patch(url, batch)
+        return response.text
 
     def input(self, id):
         """Get the input CSV for the batch
@@ -381,7 +333,7 @@ class Permissions(Client):
             raise TurkleClientException(f"Unrecognized instance type: {instance_type}")
         return url
 
-    def retrieve(self, instance_type, instance_id):
+    def get(self, instance_type, instance_id):
         """Get the permissions for the project or batch
 
         Args:
@@ -424,3 +376,12 @@ class Permissions(Client):
         url = self._get_url(instance_type, instance_id)
         response = self._put(url, permissions)
         return response.text
+
+    def list(self):
+        raise NotImplementedError()
+
+    def create(self, instance):
+        raise NotImplementedError()
+
+    def retrieve(self, instance_id):
+        raise NotImplementedError()
