@@ -12,9 +12,15 @@ class Client:
     Base client for Turkle REST API
 
     The child classes are Users, Groups, Projects, Batches, and Permissions.
-    Their methods return json/jsonl data as a string.
+    Their methods return json/jsonl or csv data as a string.
     """
     def __init__(self, base_url, token):
+        """Construct a client
+
+        Args:
+            base_url (str): The URL of the Turkle site
+            token (str): An authentication token for Turkle
+        """
         self.base_url = base_url.rstrip('/')
         self.headers = {'Authorization': f'TOKEN {token}'}
 
@@ -117,7 +123,7 @@ class Users(Client):
             users (list): List of user object dictionaries
 
         Returns:
-            str: jsonl where each line is the created user
+            str: jsonl where each line is a created user
         """
         url = self.Urls.list.format(base=self.base_url)
         text = ''
@@ -133,9 +139,8 @@ class Users(Client):
             users (list): List of user object dictionaries with ids
 
         Returns:
-            str: jsonl where each line is the updated user
+            str: jsonl where each line is an updated user
         """
-        url = self.Urls.list.format(base=self.base_url)
         text = ''
         for user in users:
             url = self.Urls.detail.format(base=self.base_url, id=user['id'])
@@ -166,6 +171,7 @@ class Groups(Client):
         Args:
             id (int): Group id
             name (str): Group name
+
         Returns:
             str: single line if using id and one or more lines if name
         """
@@ -179,27 +185,36 @@ class Groups(Client):
         else:
             raise TurkleClientException("id or name must be passed")
 
-    def create(self, file, **kwargs):
-        if not file:
-            raise ValueError("--file must be set for groups create")
-        url = self.Urls.list.format(base=self.base_url)
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                self._post(url, json.loads(line.strip()))
-                count += 1
-        return f"{plural(count, 'user', 'users')} created"
+    def create(self, groups):
+        """Create groups
 
-    def addusers(self, id, file, **kwargs):
-        if not id:
-            raise ValueError("--id must be set for groups addusers")
-        if not file:
-            raise ValueError("--file must be set for groups addusers")
-        url = self.Urls.addusers.format(base=self.base_url, id=id)
-        with open(file, 'r') as fh:
-            data = json.load(fh)
-            self._post(url, data)
-        return f"{plural(len(data['users']), 'user', 'users')} add to the group"
+        Args:
+            groups (list): List of group object dictionaries
+
+        Returns:
+            str: jsonl where each line is a created group
+        """
+        url = self.Urls.list.format(base=self.base_url)
+        text = ''
+        for group in groups:
+            response = self._post(url, group)
+            text += response.text + '\n'
+        return text
+
+    def addusers(self, group_id, user_ids, **kwargs):
+        """Add users to a group
+
+        Args:
+            group_id (int): Group id
+            user_ids (list): List of User ids
+
+        Returns:
+            str: jsonl where each line is a created group
+        """
+        url = self.Urls.addusers.format(base=self.base_url, id=group_id)
+        data = {'users': user_ids}
+        response = self._post(url, data)
+        return response.text
 
 
 class Projects(Client):
@@ -208,52 +223,66 @@ class Projects(Client):
         detail = "{base}/api/projects/{id}/"
         batches = "{base}/api/projects/{id}/batches/"
 
-    def list(self, **kwargs):
+    def list(self):
+        """List all projects
+
+        Returns:
+            str: jsonl where each line is a project object
+        """
         url = self.Urls.list.format(base=self.base_url)
         return self._walk(url)
 
-    def retrieve(self, id=None, **kwargs):
-        if not id:
-            raise ValueError("--id must be set for 'projects retrieve'")
+    def retrieve(self, id):
+        """Retrieve a project using id
+
+        Args:
+            id (int): project id
+
+        Returns:
+            str: project encoded as json
+        """
         url = self.Urls.detail.format(base=self.base_url, id=id)
         response = self._get(url)
         return response.text
 
-    def create(self, file, **kwargs):
-        if not file:
-            raise ValueError("--file must be set for projects create")
+    def create(self, projects):
+        """Create projects
+
+        Args:
+            projects (list): List of project object dictionaries
+
+        Returns:
+            str: jsonl where each line is a created project
+        """
         url = self.Urls.list.format(base=self.base_url)
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                data = json.loads(line.strip())
-                if 'html_template' not in data:
-                    with open(data['filename'], 'r') as csv_fh:
-                        data['html_template'] = csv_fh.read()
-                        data['filename'] = os.path.basename(data['filename'])
-                self._post(url, data)
-                count += 1
-        return f"{plural(count, 'project', 'projects')} created"
+        text = ''
+        for project in projects:
+            response = self._post(url, project)
+            text += response.text + '\n'
+        return text
 
-    def update(self, file, **kwargs):
-        if not file:
-            raise ValueError("--file must be set for projects update")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                data = json.loads(line.strip())
-                if 'html_template' not in data and 'filename' in data:
-                    with open(data['filename'], 'r') as csv_fh:
-                        data['html_template'] = csv_fh.read()
-                        data['filename'] = os.path.basename(data['filename'])
-                url = self.Urls.detail.format(base=self.base_url, id=data['id'])
-                self._patch(url, data)
-                count += 1
-        return f"{plural(count, 'project', 'projects')} updated"
+    def update(self, projects):
+        """Update projects
 
-    def batches(self, id=None, **kwargs):
-        if not id:
-            raise ValueError("--id must be set for 'projects batches'")
+        Args:
+            projects (list): List of project object dictionaries with ids
+
+        Returns:
+            str: jsonl where each line is an updated project
+        """
+        text = ''
+        for project in projects:
+            url = self.Urls.detail.format(base=self.base_url, id=project['id'])
+            response = self._patch(url, project)
+            text += response.text + '\n'
+        return text
+
+    def batches(self, id):
+        """List all batches for a project
+
+        Returns:
+            str: jsonl where each line is a batch object
+        """
         url = self.Urls.batches.format(base=self.base_url, id=id)
         return self._walk(url)
 
@@ -266,61 +295,97 @@ class Batches(Client):
         results = "{base}/api/batches/{id}/results/"
         progress = "{base}/api/batches/{id}/progress/"
 
-    def list(self, **kwargs):
+    def list(self):
+        """List all batches
+
+        Returns:
+            str: jsonl where each line is a batch object
+        """
         url = self.Urls.list.format(base=self.base_url)
         return self._walk(url)
 
-    def retrieve(self, id=None, **kwargs):
-        if not id:
-            raise ValueError(f"--id must be set for 'batches retrieve'")
+    def retrieve(self, id):
+        """Retrieve a batch using id
+
+        Args:
+            id (int): batch id
+
+        Returns:
+            str: batch encoded as json
+        """
         url = self.Urls.detail.format(base=self.base_url, id=id)
         response = self._get(url)
         return response.text
 
-    def create(self, file, **kwargs):
-        if not file:
-            raise ValueError("--file must be set for batches create")
+    def create(self, batches):
+        """Create batches
+
+        Args:
+            batches (list): List of batch object dictionaries
+
+        Returns:
+            str: jsonl where each line is a created batch
+        """
         url = self.Urls.list.format(base=self.base_url)
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                data = json.loads(line.strip())
-                with open(data['filename'], 'r') as csv_fh:
-                    data['csv_text'] = csv_fh.read()
-                    data['filename'] = os.path.basename(data['filename'])
-                self._post(url, data)
-                count += 1
-        return f"{plural(count, 'batch', 'batches')} created"
+        text = ''
+        for batch in batches:
+            response = self._post(url, batch)
+            text += response.text + '\n'
+        return text
 
-    def update(self, file, **kwargs):
-        if not file:
-            raise ValueError("--file must be set for batches update")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                data = json.loads(line.strip())
-                url = self.Urls.detail.format(base=self.base_url, id=data['id'])
-                self._patch(url, data)
-                count += 1
-        return f"{plural(count, 'batch', 'batches')} updated"
+    def update(self, batches):
+        """Update batches
 
-    def input(self, id=None, **kwargs):
-        if not id:
-            raise ValueError(f"--id must be set for 'batches input'")
+        Cannot update the CSV data. See addtasks to add additional tasks.
+
+        Args:
+            batches (list): List of batch object dictionaries with ids
+
+        Returns:
+            str: jsonl where each line is an updated batch
+        """
+        text = ''
+        for batch in batches:
+            url = self.Urls.detail.format(base=self.base_url, id=batch['id'])
+            response = self._patch(url, batch)
+            text += response.text + '\n'
+        return text
+
+    def input(self, id):
+        """Get the input CSV for the batch
+
+        Args:
+            id (int): batch id
+
+        Returns:
+             str: CSV data as a string
+        """
         url = self.Urls.input.format(base=self.base_url, id=id)
         response = self._get(url)
         return response.text
 
-    def results(self, id=None, **kwargs):
-        if not id:
-            raise ValueError(f"--id must be set for 'batches results'")
+    def results(self, id):
+        """Get the results CSV for the batch
+
+        Args:
+            id (int): batch id
+
+        Returns:
+             str: CSV data as a string
+        """
         url = self.Urls.results.format(base=self.base_url, id=id)
         response = self._get(url)
         return response.text
 
-    def progress(self, id=None, **kwargs):
-        if not id:
-            raise ValueError(f"--id must be set for 'batches progress'")
+    def progress(self, id):
+        """Get the progress information for the batch
+
+        Args:
+            id (int): batch id
+
+        Returns:
+             str: json progress object
+        """
         url = self.Urls.progress.format(base=self.base_url, id=id)
         response = self._get(url)
         return response.text
@@ -331,34 +396,58 @@ class Permissions(Client):
         projects = "{base}/api/projects/{id}/permissions/"
         batches = "{base}/api/batches/{id}/permissions/"
 
-    def get_url(self, pid=None, bid=None):
-        if pid:
-            url = self.Urls.projects.format(base=self.base_url, id=pid)
-        elif bid:
-            url = self.Urls.batches.format(base=self.base_url, id=bid)
+    PROJECT = 'project'
+    BATCH = 'batch'
+
+    def _get_url(self, instance_type, instance_id):
+        if instance_type == self.PROJECT:
+            url = self.Urls.projects.format(base=self.base_url, id=instance_id)
+        elif instance_type == self.BATCH:
+            url = self.Urls.batches.format(base=self.base_url, id=instance_id)
         else:
-            raise ValueError("--pid or --bid is required")
+            raise TurkleClientException(f"Unrecognized instance type: {instance_type}")
         return url
 
-    def retrieve(self, pid=None, bid=None, **kwargs):
-        url = self.get_url(pid, bid)
+    def retrieve(self, instance_type, instance_id):
+        """Get the permissions for the project or batch
+
+        Args:
+            instance_type (str): Name of the type (project, batch)
+            instance_id (int): Id of the project or batch
+
+        Returns:
+            str: json representation of the permissions
+        """
+        url = self._get_url(instance_type, instance_id)
         response = self._get(url)
         return response.text
 
-    def add(self, pid=None, bid=None, file=None, **kwargs):
-        if not file:
-            raise ValueError("--file must be set for permissions add")
-        url = self.get_url(pid, bid)
-        with open(file, 'r') as fh:
-            data = json.load(fh)
-            self._post(url, data)
-        return "Permissions updated"
+    def add(self, instance_type, instance_id, permissions):
+        """Add additional users and groups to the permissions
 
-    def replace(self, pid=None, bid=None, file=None, **kwargs):
-        if not file:
-            raise ValueError("--file must be set for permissions replace")
-        url = self.get_url(pid, bid)
-        with open(file, 'r') as fh:
-            data = json.load(fh)
-            self._put(url, data)
-        return "Permissions updated"
+        Args:
+            instance_type (str): Name of the type (project, batch)
+            instance_id (int): Id of the project or batch
+            permissions (dict): Dictionary with keys 'users' and 'groups' for lists of ids
+
+        Returns:
+            str: json representation of the updated permissions
+        """
+        url = self._get_url(instance_type, instance_id)
+        response = self._post(url, permissions)
+        return response.text
+
+    def replace(self, instance_type, instance_id, permissions):
+        """Replace the permissions
+
+        Args:
+            instance_type (str): Name of the type (project, batch)
+            instance_id (int): Id of the project or batch
+            permissions (dict): Dictionary with keys 'users' and 'groups' for lists of ids
+
+        Returns:
+            str: json representation of the updated permissions
+        """
+        url = self._get_url(instance_type, instance_id)
+        response = self._put(url, permissions)
+        return response.text

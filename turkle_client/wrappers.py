@@ -1,5 +1,7 @@
 import json
+import os.path
 
+from .client import Permissions
 from .exceptions import TurkleClientException
 
 
@@ -26,7 +28,7 @@ class UsersWrapper(Wrapper):
 
     def create(self, file, **kwargs):
         if not file:
-            raise TurkleClientException("--file must be set for users create")
+            raise TurkleClientException("--file must be set for 'users create'")
         with open(file, 'r') as fh:
             data = [json.loads(line) for line in fh]
             self.client.create(data)
@@ -34,7 +36,7 @@ class UsersWrapper(Wrapper):
 
     def update(self, file, **kwargs):
         if not file:
-            raise TurkleClientException("--file must be set for users update")
+            raise TurkleClientException("--file must be set for 'users update'")
         with open(file, 'r') as fh:
             data = [json.loads(line) for line in fh]
             self.client.update(data)
@@ -49,22 +51,139 @@ class GroupsWrapper(Wrapper):
 
     def create(self, file, **kwargs):
         if not file:
-            raise ValueError("--file must be set for groups create")
-        url = self.Urls.list.format(base=self.base_url)
+            raise ValueError("--file must be set for 'groups create'")
         with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                self._post(url, json.loads(line.strip()))
-                count += 1
-        return f"{plural(count, 'user', 'users')} created"
+            data = [json.loads(line) for line in fh]
+            self.client.create(data)
+            return f"{plural(len(data), 'group', 'groups')} created\n"
 
     def addusers(self, id, file, **kwargs):
+        # file contains json encoded list of user ids
         if not id:
-            raise ValueError("--id must be set for groups addusers")
+            raise ValueError("--id must be set for 'groups addusers'")
         if not file:
-            raise ValueError("--file must be set for groups addusers")
-        url = self.Urls.addusers.format(base=self.base_url, id=id)
+            raise ValueError("--file must be set for 'groups addusers'")
         with open(file, 'r') as fh:
             data = json.load(fh)
-            self._post(url, data)
-        return f"{plural(len(data['users']), 'user', 'users')} add to the group"
+            self.client.addusers(id, data)
+            return f"{plural(len(data), 'user', 'users')} added to the group\n"
+
+
+class ProjectsWrapper(Wrapper):
+    def retrieve(self, id, **kwargs):
+        if not id:
+            raise TurkleClientException("--id must be set for 'projects retrieve'")
+        return self.client.retrieve(id) + "\n"
+
+    def create(self, file, **kwargs):
+        if not file:
+            raise TurkleClientException("--file must be set for 'projects create'")
+        with open(file, 'r') as fh:
+            projects = []
+            for line in fh:
+                project = json.loads(line.strip())
+                if 'html_template' not in project:
+                    with open(project['filename'], 'r') as template_fh:
+                        project['html_template'] = template_fh.read()
+                        project['filename'] = os.path.basename(project['filename'])
+                projects.append(project)
+            self.client.create(projects)
+            return f"{plural(len(projects), 'project', 'projects')} created\n"
+
+    def update(self, file, **kwargs):
+        if not file:
+            raise TurkleClientException("--file must be set for 'projects update'")
+        with open(file, 'r') as fh:
+            projects = []
+            for line in fh:
+                project = json.loads(line.strip())
+                if 'html_template' not in project and 'filename' in project:
+                    with open(project['filename'], 'r') as template_fh:
+                        project['html_template'] = template_fh.read()
+                        project['filename'] = os.path.basename(project['filename'])
+                projects.append(project)
+            self.client.update(projects)
+            return f"{plural(len(projects), 'project', 'projects')} updated\n"
+
+    def batches(self, id, **kwargs):
+        if not id:
+            raise TurkleClientException("--id must be set for 'projects batches'")
+        return self.client.batches(id)
+
+
+class BatchesWrapper(Wrapper):
+    def retrieve(self, id, **kwargs):
+        if not id:
+            raise TurkleClientException("--id must be set for 'batches retrieve'")
+        return self.client.retrieve(id) + "\n"
+
+    def create(self, file, **kwargs):
+        if not file:
+            raise TurkleClientException("--file must be set for 'batches create'")
+        with open(file, 'r') as fh:
+            batches = []
+            for line in fh:
+                batch = json.loads(line)
+                with open(batch['filename'], 'r') as csv_fh:
+                    batch['csv_text'] = csv_fh.read()
+                    batch['filename'] = os.path.basename(batch['filename'])
+                batches.append(batch)
+            self.client.create(batches)
+            return f"{plural(len(batches), 'batch', 'batches')} created\n"
+
+    def update(self, file, **kwargs):
+        if not file:
+            raise TurkleClientException("--file must be set for 'batches update'")
+        with open(file, 'r') as fh:
+            data = [json.loads(line) for line in fh]
+            self.client.update(data)
+            return f"{plural(len(data), 'batch', 'batches')} updated\n"
+
+    def input(self, id, **kwargs):
+        if not id:
+            raise TurkleClientException("--id must be set for 'batches input'")
+        return self.client.input(id)
+
+    def progress(self, id, **kwargs):
+        if not id:
+            raise TurkleClientException("--id must be set for 'batches progress'")
+        return self.client.progress(id) + "\n"
+
+    def results(self, id, **kwargs):
+        if not id:
+            raise TurkleClientException("--id must be set for 'batches results'")
+        return self.client.results(id)
+
+
+class PermissionsWrapper(Wrapper):
+    def _prepare_args(self, pid, bid):
+        if pid:
+            return Permissions.PROJECT, pid
+        else:
+            return Permissions.BATCH, bid
+
+    def retrieve(self, pid, bid, **kwargs):
+        if not pid and not bid:
+            raise TurkleClientException("--pid or --bid is required for 'permissions retrieve'")
+        text = self.client.retrieve(*self._prepare_args(pid, bid))
+        return text + "\n"
+
+    def add(self, pid, bid, file, **kwargs):
+        if not pid and not bid:
+            raise TurkleClientException("--pid or --bid is required for 'permissions add'")
+        if not file:
+            raise ValueError("--file must be set for 'permissions add'")
+        with open(file, 'r') as fh:
+            data = json.load(fh)
+            text = self.client.add(*self._prepare_args(pid, bid), data)
+            return text + "\n"
+
+    def replace(self, pid, bid, file, **kwargs):
+        if not pid and not bid:
+            raise TurkleClientException("--pid or --bid is required for 'permissions replace'")
+        if not file:
+            raise ValueError("--file must be set for 'permissions replace'")
+        with open(file, 'r') as fh:
+            data = json.load(fh)
+            text = self.client.replace(*self._prepare_args(pid, bid), data)
+            return text + "\n"

@@ -6,7 +6,8 @@ import sys
 import appdirs
 
 from .client import Batches, Groups, Permissions, Projects, Users
-from .wrappers import GroupsWrapper, UsersWrapper
+from .wrappers import BatchesWrapper, GroupsWrapper, PermissionsWrapper, ProjectsWrapper, \
+    UsersWrapper
 
 config_choices = ['token', 'url']
 config_help = """token  Set the API token
@@ -24,7 +25,7 @@ groups_choices = ['list', 'create', 'retrieve', 'addusers']
 groups_help = """list      List all groups as jsonl
 create    Create new groups
 retrieve  Retrieve a group selected by name or integer identifier
-addusers  Add users to an existing group by passing their ids
+addusers  Add users to an existing group by passing their ids as list in file
 """
 
 projects_choices = ['list', 'create', 'retrieve', 'update', 'batches']
