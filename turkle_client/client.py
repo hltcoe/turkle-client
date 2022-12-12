@@ -24,6 +24,15 @@ class Client:
         self.base_url = base_url.rstrip('/')
         self.headers = {'Authorization': f'TOKEN {token}'}
 
+    def list(self):
+        """List all instances
+
+        Returns:
+            str: jsonl where each line is an object
+        """
+        url = self.Urls.list.format(base=self.base_url)
+        return self._walk(url)
+
     def _walk(self, url,  **kwargs):
         jsonl = io.StringIO()
         data = {'next': url}
@@ -89,15 +98,6 @@ class Users(Client):
         detail = "{base}/api/users/{id}/"
         username = "{base}/api/users/username/{username}/"
 
-    def list(self):
-        """List all users
-
-        Returns:
-            str: jsonl where each line is a user object
-        """
-        url = self.Urls.list.format(base=self.base_url)
-        return self._walk(url)
-
     def retrieve(self, id=None, username=None):
         """Retrieve a user using id or username
 
@@ -156,15 +156,6 @@ class Groups(Client):
         name = "{base}/api/groups/name/{name}/"
         addusers = "{base}/api/groups/{id}/users/"
 
-    def list(self):
-        """List all groups
-
-        Returns:
-            str: jsonl where each line is a group object
-        """
-        url = self.Urls.list.format(base=self.base_url)
-        return self._walk(url)
-
     def retrieve(self, id=None, name=None):
         """Retrieve a group(s) using id or name
 
@@ -222,15 +213,6 @@ class Projects(Client):
         list = "{base}/api/projects/"
         detail = "{base}/api/projects/{id}/"
         batches = "{base}/api/projects/{id}/batches/"
-
-    def list(self):
-        """List all projects
-
-        Returns:
-            str: jsonl where each line is a project object
-        """
-        url = self.Urls.list.format(base=self.base_url)
-        return self._walk(url)
 
     def retrieve(self, id):
         """Retrieve a project using id
@@ -294,15 +276,6 @@ class Batches(Client):
         input = "{base}/api/batches/{id}/input/"
         results = "{base}/api/batches/{id}/results/"
         progress = "{base}/api/batches/{id}/progress/"
-
-    def list(self):
-        """List all batches
-
-        Returns:
-            str: jsonl where each line is a batch object
-        """
-        url = self.Urls.list.format(base=self.base_url)
-        return self._walk(url)
 
     def retrieve(self, id):
         """Retrieve a batch using id
