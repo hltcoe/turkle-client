@@ -230,13 +230,16 @@ class Projects(Client):
         response = self._patch(url, project)
         return response.text
 
-    def batches(self, id):
+    def batches(self, project_id):
         """List all batches for a project
+
+        Args:
+            project_id (int): Project id
 
         Returns:
             str: jsonl where each line is a batch object
         """
-        url = self.Urls.batches.format(base=self.base_url, id=id)
+        url = self.Urls.batches.format(base=self.base_url, id=project_id)
         return self._walk(url)
 
 
@@ -276,42 +279,42 @@ class Batches(Client):
         response = self._patch(url, batch)
         return response.text
 
-    def input(self, id):
+    def input(self, batch_id):
         """Get the input CSV for the batch
 
         Args:
-            id (int): batch id
+            batch_id (int): Batch id
 
         Returns:
              str: CSV data as a string
         """
-        url = self.Urls.input.format(base=self.base_url, id=id)
+        url = self.Urls.input.format(base=self.base_url, id=batch_id)
         response = self._get(url)
         return response.text
 
-    def results(self, id):
+    def results(self, batch_id):
         """Get the results CSV for the batch
 
         Args:
-            id (int): batch id
+            batch_id (int): Batch id
 
         Returns:
              str: CSV data as a string
         """
-        url = self.Urls.results.format(base=self.base_url, id=id)
+        url = self.Urls.results.format(base=self.base_url, id=batch_id)
         response = self._get(url)
         return response.text
 
-    def progress(self, id):
+    def progress(self, batch_id):
         """Get the progress information for the batch
 
         Args:
-            id (int): batch id
+            batch_id (int): batch id
 
         Returns:
              str: json progress object
         """
-        url = self.Urls.progress.format(base=self.base_url, id=id)
+        url = self.Urls.progress.format(base=self.base_url, id=batch_id)
         response = self._get(url)
         return response.text
 
