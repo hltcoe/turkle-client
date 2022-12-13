@@ -2,6 +2,7 @@ import argparse
 import json
 import os.path
 import sys
+import traceback
 
 import appdirs
 
@@ -53,11 +54,15 @@ replace   Replace a project's or batch's permissions
 """
 
 
-class Cmd:
+class Cli:
     def __init__(self):
+        self.debug = False
+
         self.parser = argparse.ArgumentParser(description='Turkle client help')
         self.parser.add_argument('-t', '--token', help='API token')
         self.parser.add_argument('-u', '--url', help='Base URL for the Turkle site')
+        self.parser.add_argument('-d', '--debug', action='store_true',
+                                 help='Detailed stack traces on errors')
         self.update_title(self.parser, 'Object command')
         subparsers = self.parser.add_subparsers(dest='command')
 
@@ -104,7 +109,7 @@ class Cmd:
 
         batches_parser = subparsers.add_parser(
             'batches',
-            help='List, create, or update batches.',
+            help='List, create, or update batches or get results and progress.',
             formatter_class=argparse.RawTextHelpFormatter
         )
         self.update_title(batches_parser)
@@ -129,6 +134,7 @@ class Cmd:
 
     def dispatch(self):
         args = self.parser.parse_args()
+        self.debug = bool(args.debug)
 
         if args.command == 'config':
             self.set_config(args.subcommand, args.value)
@@ -179,10 +185,14 @@ class Cmd:
 
 
 def main():
-    #try:
-        Cmd().dispatch()
-    #except Exception as e:
-    #    print(f"Error: {e}")
+    cli = Cli()
+    try:
+        cli.dispatch()
+    except Exception as e:
+        if cli.debug:
+            traceback.print_exc()
+        else:
+            print(f"Error: {e}")
 
 
 if __name__ == '__main__':
