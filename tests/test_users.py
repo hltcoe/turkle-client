@@ -10,6 +10,6 @@ my_vcr = vcr.VCR(
 
 @my_vcr.use_cassette()
 def test_retrieve():
-    client = Users("http://localhost:8000/", "858cac69a52c1f7846571d0d81d397e792d35888")
+    client = Users("http://localhost:8000/", "41dcbb22264dd60c5232383fc844dbbab4839146")
     text = client.retrieve(1)
     assert 'AnonymousUser' in text
