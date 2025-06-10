@@ -12,3 +12,10 @@ pip install turkle-client
 
 Usage
 --------------
+
+Tests
+-------------
+To run the tests, install the test requirements and then run:
+```
+pytest
+```
