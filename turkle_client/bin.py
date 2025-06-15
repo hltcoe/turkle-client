@@ -162,11 +162,19 @@ class Cli:
                 self.set_config(args.subcommand, args.value)
                 print(f"{args.subcommand} set to {args.value}")
             else:
-                print(f"Error: {args.subcommand} not specified")
+                raise ValueError(f"{args.subcommand} not specified")
             return
 
+        config = self.load_config()
+        token = args.token or config.get('token')
+        url = args.url or config.get('url')
+        if not token:
+            raise ValueError("API token not specified (use --token or config)")
+        if not url:
+            raise ValueError("API URL not specified (use --url or config)")
+
         # construct the class and method from the command and subcommand
-        client = self.construct_client(args.command.capitalize(), args.url, args.token)
+        client = self.construct_client(args.command.capitalize(), url, token)
         print(getattr(client, args.subcommand)(**vars(args)), end='')
 
     def construct_client(self, name, url, token):
