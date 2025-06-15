@@ -1,3 +1,4 @@
+import csv
 import json
 import os.path
 
@@ -7,6 +8,38 @@ from .exceptions import TurkleClientException
 
 def plural(num, single, mult):
     return f"{num} {single if num == 1 else mult}"
+
+
+def load_records(file_path):
+    """
+    Yields dictionaries from a .jsonl or .csv file.
+
+    Args:
+        file_path (str): Path to the input file
+
+    Returns:
+        Iterator: iterator over dictionaries
+    """
+    ext = os.path.splitext(file_path)[1].lower()
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as fh:
+            if ext == '.jsonl':
+                for lineno, line in enumerate(fh, start=1):
+                    if not line.strip():
+                        continue  # skip blank lines
+                    try:
+                        yield json.loads(line)
+                    except json.JSONDecodeError as e:
+                        raise ValueError(f"Invalid JSON on line {lineno} in {file_path}: {e}")
+            elif ext == '.csv':
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    yield row
+            else:
+                raise ValueError(f"Unsupported file format: {ext}")
+    except OSError as e:
+        raise ValueError(f"Could not open file {file_path}: {e}")
 
 
 class Wrapper:
@@ -32,35 +65,28 @@ class UsersWrapper(Wrapper):
     def create(self, file, **kwargs):
         if not file:
             raise TurkleClientException("--file must be set for 'users create'")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                count += 1
-                try:
-                    obj = json.loads(line)
-                except json.decoder.JSONDecodeError as e:
-                    raise TurkleClientException(
-                        f"Failure loading json object on line {count} in {file}: {e}"
-                    )
-                try:
-                    self.client.create(obj)
-                except TurkleClientException as e:
-                    raise TurkleClientException(f"Failure on line {count} in {file}: {e}")
-            return f"{plural(count, 'user', 'users')} created\n"
+
+        lineno = 0
+        try:
+            for lineno, obj in enumerate(load_records(file), start=1):
+                self.client.create(obj)
+        except TurkleClientException as e:
+            raise TurkleClientException(f"Failure on line {lineno} in {file}: {e}")
+
+        return f"{plural(lineno, 'user', 'users')} created\n"
 
     def update(self, file, **kwargs):
         if not file:
             raise TurkleClientException("--file must be set for 'users update'")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                count += 1
-                obj = json.loads(line)
-                try:
-                    self.client.update(obj)
-                except TurkleClientException as e:
-                    raise TurkleClientException(f"Failure on line {count} in {file}: {e}")
-            return f"{plural(count, 'user', 'users')} updated\n"
+
+        lineno = 0
+        try:
+            for lineno, obj in enumerate(load_records(file), start=1):
+                self.client.update(obj)
+        except TurkleClientException as e:
+            raise TurkleClientException(f"Failure on line {lineno} in {file}: {e}")
+
+        return f"{plural(lineno, 'user', 'users')} updated\n"
 
 
 class GroupsWrapper(Wrapper):

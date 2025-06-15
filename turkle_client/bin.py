@@ -89,7 +89,7 @@ class Cli:
         users_parser.add_argument('subcommand', choices=users_choices, help=users_help)
         users_parser.add_argument('--id', help='User id (integer) - for retrieve')
         users_parser.add_argument('--username', help='Username - for retrieve')
-        users_parser.add_argument('--file', help='Jsonl file - required for create and update')
+        users_parser.add_argument('--file', help='jsonl/csv file - required for create and update')
 
         groups_parser = subparsers.add_parser(
             'groups',
@@ -178,6 +178,7 @@ class Cli:
         print(getattr(client, args.subcommand)(**vars(args)), end='')
 
     def construct_client(self, name, url, token, debug):
+        # the wrapper handles interactions requiring multiple calls
         client_class = getattr(sys.modules[__name__], name)
         client = client_class(url, token, debug)
         wrapper_class = getattr(sys.modules[__name__], name + 'Wrapper')

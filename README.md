@@ -32,6 +32,17 @@ To list current users:
 turkle-client users list
 ```
 
+To create users, create a CSV file like this:
+```
+username,password,first_name,last_name,email
+smithgc1,p@ssw0rd,george,smith,gcs@mail.com
+jonesrt1,12345678,roger,jones,jones@mail.com
+```
+and then pass it to the client::
+```
+turkle-client users create --file new_users.csv
+```
+
 ## Developers
 
 ### Installing

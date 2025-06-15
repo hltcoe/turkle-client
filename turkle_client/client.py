@@ -166,6 +166,8 @@ class Users(Client):
         Returns:
             str: json representation of the updated user
         """
+        if self.debug:
+            print(f"Debug: Updated user dict: {user}")
         url = self.Urls.detail.format(base=self.base_url, id=user['id'])
         response = self._patch(url, user)
         return response.text
