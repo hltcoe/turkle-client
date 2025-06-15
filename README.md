@@ -10,6 +10,17 @@ pip install turkle-client
 
 ## Usage
 
+### Configuration
+Set the url of the Turkle site and your token:
+```
+turkle-client config url https://example.org/
+turkle-client config token 41dcbb22264dd60c5232383fc844dbbab4839146
+```
+To view your configuration:
+```
+turkle-client config print
+```
+
 ## Developers
 
 ### Installing

@@ -12,9 +12,10 @@ from .wrappers import BatchesWrapper, GroupsWrapper, PermissionsWrapper, Project
 from .__version__ import __version__
 
 
-config_choices = ['token', 'url']
+config_choices = ['token', 'url', 'print']
 config_help = """token  Set the API token
-url    Set the base URL for the Turkle site. Ex: http://localhost:8000/ 
+url    Set the base URL for the Turkle site. Ex: http://localhost:8000/
+print  Print the current configuration values
 """
 
 users_choices = ['list', 'create', 'retrieve', 'update']
@@ -77,7 +78,7 @@ class Cli:
         )
         self.update_title(config_parser, 'Parameter')
         config_parser.add_argument('subcommand', choices=config_choices, help=config_help)
-        config_parser.add_argument('value', help='The value to set for the parameter')
+        config_parser.add_argument('value', nargs='?', help='The value to set for the parameter')
 
         users_parser = subparsers.add_parser(
             'users',
@@ -142,21 +143,27 @@ class Cli:
 
         if args.version:
             print(f"Turkle client version {__version__}")
-            quit()
-
-        if args.command == 'config':
-            self.set_config(args.subcommand, args.value)
-            print(f"{args.subcommand} set to {args.value}")
             return
 
-        # load config but default to command line arguments
-        config = self.load_config()
-        args.token = args.token if args.token else config.get('token', None)
-        args.url = args.url if args.url else config.get('url', None)
-        if not args.token:
-            raise ValueError("token not specified")
-        if not args.url:
-            raise ValueError("url not specified")
+        if not args.command:
+            self.parser.print_help()
+            return
+
+        if args.command == 'config':
+            if args.subcommand == 'print':
+                config = self.load_config()
+                if config:
+                    print("Current configuration:")
+                    for key, val in config.items():
+                        print(f"  {key}: {val}")
+                else:
+                    print("No configuration found.")
+            elif args.subcommand and args.value:
+                self.set_config(args.subcommand, args.value)
+                print(f"{args.subcommand} set to {args.value}")
+            else:
+                print(f"Error: {args.subcommand} not specified")
+            return
 
         # construct the class and method from the command and subcommand
         client = self.construct_client(args.command.capitalize(), args.url, args.token)
