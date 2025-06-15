@@ -174,12 +174,12 @@ class Cli:
             raise ValueError("API URL not specified (use --url or config)")
 
         # construct the class and method from the command and subcommand
-        client = self.construct_client(args.command.capitalize(), url, token)
+        client = self.construct_client(args.command.capitalize(), url, token, self.debug)
         print(getattr(client, args.subcommand)(**vars(args)), end='')
 
-    def construct_client(self, name, url, token):
+    def construct_client(self, name, url, token, debug):
         client_class = getattr(sys.modules[__name__], name)
-        client = client_class(url, token)
+        client = client_class(url, token, debug)
         wrapper_class = getattr(sys.modules[__name__], name + 'Wrapper')
         return wrapper_class(client)
 

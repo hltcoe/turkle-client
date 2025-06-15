@@ -11,7 +11,7 @@ def plural(num, single, mult):
 
 class Wrapper:
     """
-    Client wrappers that massage input and output to match exceptions for the CLI
+    Client wrappers that massage input and output to match expectations for the CLI
     """
     def __init__(self, client):
         self.client = client
@@ -36,7 +36,12 @@ class UsersWrapper(Wrapper):
             count = 0
             for line in fh:
                 count += 1
-                obj = json.loads(line)
+                try:
+                    obj = json.loads(line)
+                except json.decoder.JSONDecodeError as e:
+                    raise TurkleClientException(
+                        f"Failure loading json object on line {count} in {file}: {e}"
+                    )
                 try:
                     self.client.create(obj)
                 except TurkleClientException as e:

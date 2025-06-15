@@ -14,7 +14,7 @@ class Client:
     The child classes are Users, Groups, Projects, Batches, and Permissions.
     Their methods return json/jsonl or csv data as a string.
     """
-    def __init__(self, base_url, token):
+    def __init__(self, base_url, token, debug=False):
         """Construct a client
 
         Args:
@@ -23,6 +23,12 @@ class Client:
         """
         self.base_url = base_url.rstrip('/')
         self.headers = {'Authorization': f'TOKEN {token}'}
+        self.debug = debug
+
+    class Urls:
+        # child classes must set the list and detail url for that part of the API
+        list = ""
+        detail = ""
 
     def list(self):
         """List all instances (user, group, project, batch)
@@ -145,6 +151,8 @@ class Users(Client):
         Returns:
             str: json representation of the created user
         """
+        if self.debug:
+            print(f"Debug: New user dict: {user}")
         url = self.Urls.list.format(base=self.base_url)
         response = self._post(url, user)
         return response.text

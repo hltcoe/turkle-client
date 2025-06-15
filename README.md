@@ -21,6 +21,17 @@ To view your configuration:
 turkle-client config print
 ```
 
+The token and url can also be specified on the command line:
+```
+turkle-client -u https://example.org -t abcdef users list
+```
+
+### Users
+To list current users:
+```
+turkle-client users list
+```
+
 ## Developers
 
 ### Installing
