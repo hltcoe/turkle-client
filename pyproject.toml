@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "turkle-client"
+description = "Client for the Turkle REST API"
+readme = "README.md"
+license = { text = "BSD" }
+requires-python = ">=3.7"
+dynamic = ["version"]
+authors = [
+  { name = "Cash Costello", email = "cash.costello@gmail.com" }
+]
+dependencies = [
+  "appdirs",
+  "requests>=2"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Text Processing :: Linguistic",
+  "License :: OSI Approved :: BSD License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Operating System :: OS Independent"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "vcrpy",
+  "build",
+  "twine"
+]
+
+[tool.setuptools]
+packages = ["turkle_client"]
+
+[tool.setuptools.package-data]
+"turkle_client" = ["*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "turkle_client.__version__"}
+
+[project.scripts]
+turkle-client = "turkle_client.bin:main"

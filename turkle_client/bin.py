@@ -9,6 +9,8 @@ import appdirs
 from .client import Batches, Groups, Permissions, Projects, Users
 from .wrappers import BatchesWrapper, GroupsWrapper, PermissionsWrapper, ProjectsWrapper, \
     UsersWrapper
+from .__version__ import __version__
+
 
 config_choices = ['token', 'url']
 config_help = """token  Set the API token
@@ -63,6 +65,8 @@ class Cli:
         self.parser.add_argument('-u', '--url', help='Base URL for the Turkle site')
         self.parser.add_argument('-d', '--debug', action='store_true',
                                  help='Detailed stack traces on errors')
+        self.parser.add_argument('--version', action='store_true',
+                                 help='Get the version of this client')
         self.update_title(self.parser, 'Object command')
         subparsers = self.parser.add_subparsers(dest='command')
 
@@ -135,6 +139,10 @@ class Cli:
     def dispatch(self):
         args = self.parser.parse_args()
         self.debug = bool(args.debug)
+
+        if args.version:
+            print(f"Turkle client version {__version__}")
+            quit()
 
         if args.command == 'config':
             self.set_config(args.subcommand, args.value)
