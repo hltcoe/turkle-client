@@ -89,7 +89,7 @@ class Cli:
         users_parser.add_argument('subcommand', choices=users_choices, help=users_help)
         users_parser.add_argument('--id', help='User id (integer) - for retrieve')
         users_parser.add_argument('--username', help='Username - for retrieve')
-        users_parser.add_argument('--file', help='jsonl/csv file - required for create and update')
+        users_parser.add_argument('--file', help='jsonl/json/csv file - required for create and update')
 
         groups_parser = subparsers.add_parser(
             'groups',
@@ -100,7 +100,7 @@ class Cli:
         groups_parser.add_argument('subcommand', choices=groups_choices, help=groups_help)
         groups_parser.add_argument('--id', help='User id - required for retrieve')
         groups_parser.add_argument('--name', help='Group name - for retrieve')
-        groups_parser.add_argument('--file', help='Jsonl file - required for create or addusers')
+        groups_parser.add_argument('--file', help='jsonl/json file - required for create or addusers')
 
         projects_parser = subparsers.add_parser(
             'projects',

@@ -10,17 +10,21 @@ def plural(num, single, mult):
     return f"{num} {single if num == 1 else mult}"
 
 
-def load_records(file_path):
+def load_records(file_path, exts=None):
     """
-    Yields dictionaries from a .jsonl or .csv file.
+    Yields dictionaries from a .jsonl, .json or .csv file.
 
     Args:
         file_path (str): Path to the input file
+        exts (list): List of extensions to support
 
     Returns:
         Iterator: iterator over dictionaries
     """
+    exts = exts if exts else ['.jsonl', '.json', '.csv']
     ext = os.path.splitext(file_path)[1].lower()
+    if ext not in exts:
+        raise ValueError(f"Unsupported file format: {ext}")
 
     try:
         with open(file_path, 'r', encoding='utf-8') as fh:
@@ -36,6 +40,8 @@ def load_records(file_path):
                 reader = csv.DictReader(fh)
                 for row in reader:
                     yield row
+            elif ext == '.json':
+                yield json.load(fh)
             else:
                 raise ValueError(f"Unsupported file format: {ext}")
     except OSError as e:
@@ -101,16 +107,15 @@ class GroupsWrapper(Wrapper):
     def create(self, file, **kwargs):
         if not file:
             raise ValueError("--file must be set for 'groups create'")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                count += 1
-                obj = json.loads(line)
-                try:
-                    self.client.create(obj)
-                except TurkleClientException as e:
-                    raise TurkleClientException(f"Failure on line {count} in {file}: {e}")
-            return f"{plural(count, 'group', 'groups')} created\n"
+
+        lineno = 0
+        try:
+            for lineno, obj in enumerate(load_records(file, [".jsonl", ".json"]), start=1):
+                self.client.create(obj)
+        except TurkleClientException as e:
+            raise TurkleClientException(f"Failure on line {lineno} in {file}: {e}")
+
+        return f"{plural(lineno, 'group', 'groups')} created\n"
 
     def addusers(self, id, file, **kwargs):
         # file contains json encoded list of user ids
@@ -118,10 +123,13 @@ class GroupsWrapper(Wrapper):
             raise ValueError("--id must be set for 'groups addusers'")
         if not file:
             raise ValueError("--file must be set for 'groups addusers'")
-        with open(file, 'r') as fh:
-            data = json.load(fh)
-            self.client.addusers(id, data)
-            return f"{plural(len(data), 'user', 'users')} added to the group\n"
+
+        try:
+            user_ids = next(load_records(file, [".json"]))
+            self.client.addusers(id, user_ids)
+        except TurkleClientException as e:
+            raise TurkleClientException(f"Failure in {file}: {e}")
+        return f"{plural(len(user_ids), 'user', 'users')} added to the group\n"
 
 
 class ProjectsWrapper(Wrapper):

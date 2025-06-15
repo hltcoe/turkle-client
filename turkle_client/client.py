@@ -53,7 +53,7 @@ class Client:
         return response.text
 
     def create(self, instance):
-        """Create an instance (user, group, project, batch)
+        """Create an instance (group, project, batch)
 
         Args:
             instance (dict): Instance fields as dict
@@ -61,6 +61,8 @@ class Client:
         Returns:
             str: json representation of the created instance
         """
+        if self.debug:
+            print(f"Debug: Create object dict: {instance}")
         url = self.Urls.list.format(base=self.base_url)
         response = self._post(url, instance)
         return response.text
@@ -200,7 +202,7 @@ class Groups(Client):
             user_ids (list): List of User ids
 
         Returns:
-            str: jsonl where each line is a created group
+            str: json of the updated group
         """
         url = self.Urls.addusers.format(base=self.base_url, id=group_id)
         data = {'users': user_ids}

@@ -42,6 +42,32 @@ and then pass it to the client::
 ```
 turkle-client users create --file new_users.csv
 ```
+The create command also accepts jsonl files.
+
+### Groups
+List groups with:
+```
+turkle-client groups list
+```
+
+Creating a group requires a jsonl or json file with the name and a 
+list of user IDs:
+```
+{"name":"Spanish annotators","users":[3,7,54]}
+```
+and then passed to the command:
+```
+turkle-client groups create --file spanish.json
+```
+
+Adding users to a group requires a json file with the list of user IDs:
+```
+[2,4,17,34]
+```
+which is passed to the command with the group id:
+```
+turkle-client groups addusers --id 5 --file june_users.json
+```
 
 ## Developers
 
