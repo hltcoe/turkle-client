@@ -113,7 +113,7 @@ class GroupsWrapper(Wrapper):
             for lineno, obj in enumerate(load_records(file, [".jsonl", ".json"]), start=1):
                 self.client.create(obj)
         except TurkleClientException as e:
-            raise TurkleClientException(f"Failure on line {lineno} in {file}: {e}")
+            raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
 
         return f"{plural(lineno, 'group', 'groups')} created\n"
 
@@ -141,38 +141,36 @@ class ProjectsWrapper(Wrapper):
     def create(self, file, **kwargs):
         if not file:
             raise TurkleClientException("--file must be set for 'projects create'")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                count += 1
-                obj = json.loads(line)
+
+        lineno = 0
+        try:
+            for lineno, obj in enumerate(load_records(file, [".jsonl", ".json"]), start=1):
                 if 'html_template' not in obj:
-                    with open(obj['filename'], 'r') as template_fh:
+                    with open(os.path.expanduser(obj['filename']), 'r') as template_fh:
                         obj['html_template'] = template_fh.read()
                         obj['filename'] = os.path.basename(obj['filename'])
-                try:
-                    self.client.create(obj)
-                except TurkleClientException as e:
-                    raise TurkleClientException(f"Failure on line {count} in {file}: {e}")
-            return f"{plural(count, 'project', 'projects')} created\n"
+                self.client.create(obj)
+        except TurkleClientException as e:
+            raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
+
+        return f"{plural(lineno, 'project', 'projects')} created\n"
 
     def update(self, file, **kwargs):
         if not file:
             raise TurkleClientException("--file must be set for 'projects update'")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                count += 1
-                obj = json.loads(line)
-                if 'html_template' not in obj and 'filename' in obj:
-                    with open(obj['filename'], 'r') as template_fh:
+
+        lineno = 0
+        try:
+            for lineno, obj in enumerate(load_records(file, [".jsonl", ".json"]), start=1):
+                if 'html_template' not in obj:
+                    with open(os.path.expanduser(obj['filename']), 'r') as template_fh:
                         obj['html_template'] = template_fh.read()
                         obj['filename'] = os.path.basename(obj['filename'])
-                try:
-                    self.client.update(obj)
-                except TurkleClientException as e:
-                    raise TurkleClientException(f"Failure on line {count} in {file}: {e}")
-            return f"{plural(count, 'project', 'projects')} updated\n"
+                self.client.create(obj)
+        except TurkleClientException as e:
+            raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
+
+        return f"{plural(lineno, 'project', 'projects')} updated\n"
 
     def batches(self, id, **kwargs):
         if not id:
@@ -189,33 +187,35 @@ class BatchesWrapper(Wrapper):
     def create(self, file, **kwargs):
         if not file:
             raise TurkleClientException("--file must be set for 'batches create'")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                count += 1
-                obj = json.loads(line)
-                with open(obj['filename'], 'r') as csv_fh:
+
+        lineno = 0
+        try:
+            for lineno, obj in enumerate(load_records(file, [".jsonl", ".json"]), start=1):
+                with open(os.path.expanduser(obj['filename']), 'r') as csv_fh:
                     obj['csv_text'] = csv_fh.read()
                     obj['filename'] = os.path.basename(obj['filename'])
-                try:
-                    self.client.create(obj)
-                except TurkleClientException as e:
-                    raise TurkleClientException(f"Failure on line {count} in {file}: {e}")
-            return f"{plural(count, 'batch', 'batches')} created\n"
+                self.client.create(obj)
+        except TurkleClientException as e:
+            raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
+
+        return f"{plural(lineno, 'batch', 'batches')} created\n"
 
     def update(self, file, **kwargs):
         if not file:
             raise TurkleClientException("--file must be set for 'batches update'")
-        with open(file, 'r') as fh:
-            count = 0
-            for line in fh:
-                count += 1
-                obj = json.loads(line)
-                try:
-                    self.client.update(obj)
-                except TurkleClientException as e:
-                    raise TurkleClientException(f"Failure on line {count} in {file}: {e}")
-            return f"{plural(count, 'batch', 'batches')} updated\n"
+
+        lineno = 0
+        try:
+            for lineno, obj in enumerate(load_records(file, [".jsonl", ".json"]), start=1):
+                if 'filename' in obj:
+                    with open(os.path.expanduser(obj['filename']), 'r') as csv_fh:
+                        obj['csv_text'] = csv_fh.read()
+                        obj['filename'] = os.path.basename(obj['filename'])
+                self.client.update(obj)
+        except TurkleClientException as e:
+            raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
+
+        return f"{plural(lineno, 'batch', 'batches')} updated\n"
 
     def input(self, id, **kwargs):
         if not id:

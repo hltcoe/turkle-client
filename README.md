@@ -9,6 +9,18 @@ pip install turkle-client
 ```
 
 ## Usage
+The commandline client works similar to tools like git where there is a hierarchy
+of commands. The top level commands are config, users, groups, projects, and batches.
+Each has sub-commands like retrieve, create, or update.
+
+To get the top level documentation, pass the -h flag:
+```
+turkle-client -h
+```
+To get documentation on an individual command:
+```
+turkle-client batches -h
+```
 
 ### Configuration
 Set the url of the Turkle site and your token:
@@ -67,6 +79,46 @@ Adding users to a group requires a json file with the list of user IDs:
 which is passed to the command with the group id:
 ```
 turkle-client groups addusers --id 5 --file june_users.json
+```
+
+### Projects
+A project needs a template html file:
+```
+{
+  "name": "Image Contains",
+  "filename": "~/templates/image_contains.html"
+}
+```
+and the json object can have additional optional fields such as
+allotted_assignment_time and assignments_per_task.
+```
+turkle-client projects create --file myproject.json
+```
+
+To get information about the batches that have been published for the project:
+```
+turkle-client projects batches --id 8
+```
+
+### Batches
+To create a batch, you will need the name, project id, and csv file:
+```
+{
+  "name": "Bird Photos",
+  "project": 20,
+  "filename": "image_contains.csv",
+}
+```
+The json object can have additional fields just like creating projects.
+```
+turkle-client batches create --file mybatch.json
+```
+
+Getting the progress, the input csv or the results csv all work the same way:
+```
+turkle-client batches progress --id 17
+turkle-client batches input --id 17
+turkle-client batches results --id 17
 ```
 
 ## Developers

@@ -100,7 +100,7 @@ class Cli:
         groups_parser.add_argument('subcommand', choices=groups_choices, help=groups_help)
         groups_parser.add_argument('--id', help='User id - required for retrieve')
         groups_parser.add_argument('--name', help='Group name - for retrieve')
-        groups_parser.add_argument('--file', help='jsonl/json file - required for create or addusers')
+        groups_parser.add_argument('--file', help='json/jsonl file - required for create or addusers')
 
         projects_parser = subparsers.add_parser(
             'projects',
@@ -110,7 +110,7 @@ class Cli:
         self.update_title(projects_parser)
         projects_parser.add_argument('subcommand', choices=projects_choices, help=projects_help)
         projects_parser.add_argument('--id', help='Project id - required for retrieve and batches')
-        projects_parser.add_argument('--file', help='Jsonl file - required for create or update')
+        projects_parser.add_argument('--file', help='json/jsonl file - required for create or update')
 
         batches_parser = subparsers.add_parser(
             'batches',
@@ -120,7 +120,7 @@ class Cli:
         self.update_title(batches_parser)
         batches_parser.add_argument('subcommand', choices=batches_choices, help=batches_help)
         batches_parser.add_argument('--id', help='Batch id - required for retrieve')
-        batches_parser.add_argument('--file', help='Jsonl file - required for create or update')
+        batches_parser.add_argument('--file', help='json/jsonl file - required for create or update')
 
         perm_parser = subparsers.add_parser(
             'permissions',
