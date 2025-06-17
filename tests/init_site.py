@@ -6,33 +6,28 @@ import sys
 
 import turkle_client as tc
 
-
-users = [
-    {'username': 'user1', 'password': 'password', 'first_name': 'Bob'},
-    {'username': 'user2', 'password': 'password', 'first_name': 'Sue'},
-    {'username': 'user3', 'password': 'password', 'first_name': 'Ed'},
-    {'username': 'user4', 'password': 'password', 'first_name': 'Megan'},
-]
-
-groups = [
-    {'name': 'Group1', 'users': [3, 4]},
-    {'name': 'Group2', 'users': [5, 6]},
-    {'name': 'Group3', 'users': [3, 4, 5, 6]},
-    {'name': 'Group4', 'users': [3]}
-]
-
 def load_file(path):
     with open(path, 'r') as fh:
         return fh.read()
 
 def add_users(base_url, token):
-    global users
+    users = [
+        {'username': 'user1', 'password': 'password', 'first_name': 'Bob'},
+        {'username': 'user2', 'password': 'password', 'first_name': 'Sue'},
+        {'username': 'user3', 'password': 'password', 'first_name': 'Ed'},
+        {'username': 'user4', 'password': 'password', 'first_name': 'Megan'},
+    ]
     client = tc.Users(base_url, token)
     for user in users:
         client.create(user)
 
 def add_groups(base_url, token):
-    global groups
+    groups = [
+        {'name': 'Group1', 'users': [3, 4]},
+        {'name': 'Group2', 'users': [5, 6]},
+        {'name': 'Group3', 'users': [3, 4, 5, 6]},
+        {'name': 'Group4', 'users': [3]}
+    ]
     client = tc.Groups(base_url, token)
     for group in groups:
         client.create(group)
