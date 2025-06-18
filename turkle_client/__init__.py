@@ -1,2 +1,3 @@
 from .__version__ import __version__
 from .client import Batches, Groups, Permissions, Projects, Users
+from .exceptions import TurkleClientException

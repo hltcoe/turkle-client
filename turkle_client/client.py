@@ -12,7 +12,7 @@ class Client:
     Base client for Turkle REST API
 
     The child classes are Users, Groups, Projects, Batches, and Permissions.
-    Their methods return json/jsonl or csv data as a string.
+    Their methods return json or csv data as a string.
     """
     def __init__(self, base_url, token, debug=False):
         """Construct a client
@@ -22,7 +22,7 @@ class Client:
             token (str): An authentication token for Turkle
         """
         self.base_url = base_url.rstrip('/')
-        self.headers = {'Authorization': f'TOKEN {token}'}
+        self.headers = {'Authorization': f'Token {token}'}
         self.debug = debug
 
     class Urls:
@@ -34,7 +34,7 @@ class Client:
         """List all instances (user, group, project, batch)
 
         Returns:
-            str: jsonl where each line is an object
+            str: json of list of objects
         """
         url = self.Urls.list.format(base=self.base_url)
         return self._walk(url)
@@ -68,7 +68,8 @@ class Client:
         return response.text
 
     def _walk(self, url,  **kwargs):
-        jsonl = io.StringIO()
+        json_list = io.StringIO()
+        json_list.write("[")
         data = {'next': url}
         while data['next']:
             response = self._get(data['next'], **kwargs)
@@ -76,8 +77,13 @@ class Client:
                 self._handle_errors(response)
             data = response.json()
             for instance in data['results']:
-                jsonl.write(json.dumps(instance, ensure_ascii=False) + os.linesep)
-        return jsonl.getvalue()
+                json_list.write(json.dumps(instance, ensure_ascii=False) + ',')
+        # remove the trailing comma
+        if json_list.tell() > 1:
+            json_list.seek(json_list.tell() - 1)
+            json_list.truncate()
+        json_list.write("]")
+        return json_list.getvalue()
 
     def _get(self, url, *args, **kwargs):
         try:
@@ -189,7 +195,7 @@ class Groups(Client):
             name (str): Group name
 
         Returns:
-            str: jsonl with each line being a group that has that name
+            str: json list of groups with that name
         """
         url = self.Urls.name.format(base=self.base_url, name=name)
         return self._walk(url)
@@ -249,7 +255,7 @@ class Projects(Client):
             project_id (int): Project id
 
         Returns:
-            str: jsonl where each line is a batch object
+            str: json list of batch objects
         """
         url = self.Urls.batches.format(base=self.base_url, id=project_id)
         return self._walk(url)
@@ -287,9 +293,24 @@ class Batches(Client):
         Returns:
             str: json representations of the updated batch
         """
+        if 'csv_text' in batch:
+            raise TurkleClientException("Cannot update the csv data using update. Use addtasks")
         url = self.Urls.detail.format(base=self.base_url, id=batch['id'])
         response = self._patch(url, batch)
         return response.text
+
+    def addtasks(self, batch):
+        """Add tasks to a batch
+
+        Can only add tasks. Cannot update other fields.
+
+        Args:
+            batch (dict): Dict with id and csv_text as only fields
+
+        Returns:
+            str: json representations of the batch
+        """
+        raise NotImplementedError()
 
     def input(self, batch_id):
         """Get the input CSV for the batch
