@@ -1,0 +1,86 @@
+interactions:
+- request:
+    body: '{"id": 2, "csv_text": "object,image_url\ncar,http://example.org"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token 6fb9054827c24fa57612608422122a3a1ddeff7d
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '65'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.4
+    method: POST
+    uri: http://localhost:8000/api/batches/2/tasks/
+  response:
+    body:
+      string: '{"new_tasks":1}'
+    headers:
+      Allow:
+      - OPTIONS, POST
+      Content-Length:
+      - '15'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 18 Jun 2025 23:38:10 GMT
+      Server:
+      - WSGIServer/0.2 CPython/3.8.10
+      Vary:
+      - Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token 6fb9054827c24fa57612608422122a3a1ddeff7d
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: GET
+    uri: http://localhost:8000/api/batches/2/input/
+  response:
+    body:
+      string: '"image_url","object"
+
+        "https://raw.githubusercontent.com/hltcoe/turkle/master/examples/image_contains_birds.jpg","birds"
+
+        "http://example.org","car"
+
+        '
+    headers:
+      Allow:
+      - GET, HEAD, OPTIONS
+      Content-Disposition:
+      - attachment; filename="image_contains.csv"
+      Content-Length:
+      - '147'
+      Content-Type:
+      - text/csv
+      Date:
+      - Wed, 18 Jun 2025 23:38:10 GMT
+      Server:
+      - WSGIServer/0.2 CPython/3.8.10
+      Vary:
+      - Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+version: 1

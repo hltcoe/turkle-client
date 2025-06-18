@@ -1,0 +1,42 @@
+interactions:
+- request:
+    body: '{"users": [5, 6]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token 6fb9054827c24fa57612608422122a3a1ddeff7d
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '17'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.4
+    method: POST
+    uri: http://localhost:8000/api/groups/2/users/
+  response:
+    body:
+      string: '{"id":2,"name":"Group1","users":[3,4,5,6]}'
+    headers:
+      Allow:
+      - OPTIONS, POST
+      Content-Length:
+      - '42'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 18 Jun 2025 23:38:11 GMT
+      Server:
+      - WSGIServer/0.2 CPython/3.8.10
+      Vary:
+      - Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+version: 1

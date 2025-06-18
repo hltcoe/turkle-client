@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token bad_token
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: GET
+    uri: http://localhost:8000/api/users/
+  response:
+    body:
+      string: '{"detail":"Invalid token."}'
+    headers:
+      Allow:
+      - GET, HEAD, OPTIONS, POST
+      Content-Length:
+      - '27'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 18 Jun 2025 23:38:10 GMT
+      Server:
+      - WSGIServer/0.2 CPython/3.8.10
+      Vary:
+      - Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 403
+      message: Forbidden
+version: 1

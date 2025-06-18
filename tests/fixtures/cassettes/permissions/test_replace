@@ -1,0 +1,82 @@
+interactions:
+- request:
+    body: '{"users": [3, 4], "groups": [2]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token 6fb9054827c24fa57612608422122a3a1ddeff7d
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.4
+    method: PUT
+    uri: http://localhost:8000/api/projects/1/permissions/
+  response:
+    body:
+      string: '{"groups":[2],"users":[3,4]}'
+    headers:
+      Allow:
+      - GET, POST, PUT, HEAD, OPTIONS
+      Content-Length:
+      - '28'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 18 Jun 2025 23:38:12 GMT
+      Server:
+      - WSGIServer/0.2 CPython/3.8.10
+      Vary:
+      - Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"users": [], "groups": [2, 3]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token 6fb9054827c24fa57612608422122a3a1ddeff7d
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '31'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.4
+    method: PUT
+    uri: http://localhost:8000/api/projects/1/permissions/
+  response:
+    body:
+      string: '{"groups":[2,3],"users":[]}'
+    headers:
+      Allow:
+      - GET, POST, PUT, HEAD, OPTIONS
+      Content-Length:
+      - '27'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 18 Jun 2025 23:38:12 GMT
+      Server:
+      - WSGIServer/0.2 CPython/3.8.10
+      Vary:
+      - Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+version: 1

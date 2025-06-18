@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token 6fb9054827c24fa57612608422122a3a1ddeff7d
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: GET
+    uri: http://localhost:8000/api/projects/1/batches/
+  response:
+    body:
+      string: '{"count":1,"next":null,"previous":null,"results":[{"id":1,"name":"Dickens","created_at":"2025-06-18T19:37:29.868664-04:00","created_by":2,"project":1,"filename":"translate_two_cities.csv","allotted_assignment_time":24,"assignments_per_task":1,"login_required":true,"custom_permissions":false,"active":true,"completed":false,"published":true}]}'
+    headers:
+      Allow:
+      - GET, HEAD, OPTIONS
+      Content-Length:
+      - '343'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 18 Jun 2025 23:38:12 GMT
+      Server:
+      - WSGIServer/0.2 CPython/3.8.10
+      Vary:
+      - Cookie
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+version: 1
