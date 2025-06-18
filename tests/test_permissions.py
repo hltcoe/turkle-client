@@ -19,7 +19,6 @@ def test_retrieve():
     assert len(perms['users']) == 0
     assert len(perms['groups']) == 2
 
-@my_vcr.use_cassette()
 def test_retrieve_on_bad_type():
     client = Permissions(url, token)
     with pytest.raises(TurkleClientException, match="Unrecognized instance type: projects"):
