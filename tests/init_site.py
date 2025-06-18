@@ -64,6 +64,14 @@ def add_batches(base_url, token, turkle_path):
         'filename': os.path.basename(filename)
     })
 
+def add_permissions(base_url, token):
+    client = tc.Permissions(base_url, token)
+    client.add("project", 1, {
+        'users': [],
+        'groups': [2, 3]
+    })
+
+
 def main():
     parser = argparse.ArgumentParser(description="Turkle helper script.")
     parser.add_argument("turkle_path", help="Path to the Turkle directory")
@@ -81,6 +89,7 @@ def main():
     add_groups(args.host, args.token)
     add_projects(args.host, args.token, args.turkle_path)
     add_batches(args.host, args.token, args.turkle_path)
+    add_permissions(args.host, args.token)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,6 @@
 import pytest
 import vcr
 
-import json
-
 from .config import token, url
 
 from turkle_client.client import Groups

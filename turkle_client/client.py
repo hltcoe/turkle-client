@@ -57,43 +57,6 @@ class ClientBase:
         list = ""
         detail = ""
 
-    def list(self):
-        """List all instances (user, group, project, batch)
-
-        Returns:
-            list: list of instance dicts
-        """
-        url = self.Urls.list.format(base=self.base_url)
-        return self._walk(url)
-
-    def retrieve(self, instance_id):
-        """Retrieve an instance from an id (user, group, project, batch)
-
-        Args:
-            instance_id (int): Instance id
-
-        Returns:
-            dict: retrieved instance
-        """
-        url = self.Urls.detail.format(base=self.base_url, id=instance_id)
-        response = self._get(url)
-        return response.json()
-
-    def create(self, instance):
-        """Create an instance (group, project, batch)
-
-        Args:
-            instance (dict): Instance fields as dict
-
-        Returns:
-            dict: created instance
-        """
-        if self.debug:
-            print(f"Debug: Create object dict: {instance}")
-        url = self.Urls.list.format(base=self.base_url)
-        response = self._post(url, instance)
-        return response.json()
-
     def _walk(self, url,  **kwargs):
         objs = []
         data = {'next': url}
@@ -152,7 +115,50 @@ class ClientBase:
                 raise TurkleClientException(f"{parts[0]} - {parts[1][0]}")
 
 
-class Users(ClientBase):
+class CrudMixin:
+    """
+    Generic list, retrieve, and create methods for the entity-specific classes
+    """
+
+    def list(self):
+        """List all instances (user, group, project, batch)
+
+        Returns:
+            list: list of instance dicts
+        """
+        url = self.Urls.list.format(base=self.base_url)
+        return self._walk(url)
+
+    def retrieve(self, instance_id):
+        """Retrieve an instance from an id (user, group, project, batch)
+
+        Args:
+            instance_id (int): Instance id
+
+        Returns:
+            dict: retrieved instance
+        """
+        url = self.Urls.detail.format(base=self.base_url, id=instance_id)
+        response = self._get(url)
+        return response.json()
+
+    def create(self, instance):
+        """Create an instance (group, project, batch)
+
+        Args:
+            instance (dict): Instance fields as dict
+
+        Returns:
+            dict: created instance
+        """
+        if self.debug:
+            print(f"Debug: Create object dict: {instance}")
+        url = self.Urls.list.format(base=self.base_url)
+        response = self._post(url, instance)
+        return response.json()
+
+
+class Users(CrudMixin, ClientBase):
     class Urls:
         list = "{base}/api/users/"
         detail = "{base}/api/users/{id}/"
@@ -201,7 +207,7 @@ class Users(ClientBase):
         return response.json()
 
 
-class Groups(ClientBase):
+class Groups(CrudMixin, ClientBase):
     class Urls:
         list = "{base}/api/groups/"
         detail = "{base}/api/groups/{id}/"
@@ -236,7 +242,7 @@ class Groups(ClientBase):
         return response.json()
 
 
-class Projects(ClientBase):
+class Projects(CrudMixin, ClientBase):
     class Urls:
         list = "{base}/api/projects/"
         detail = "{base}/api/projects/{id}/"
@@ -281,7 +287,7 @@ class Projects(ClientBase):
         return self._walk(url)
 
 
-class Batches(ClientBase):
+class Batches(CrudMixin, ClientBase):
     class Urls:
         list = "{base}/api/batches/"
         detail = "{base}/api/batches/{id}/"
@@ -389,12 +395,12 @@ class Permissions(ClientBase):
             raise TurkleClientException(f"Unrecognized instance type: {instance_type}")
         return url
 
-    def get(self, instance_type, instance_id):
-        """Get the permissions for the project or batch
+    def retrieve(self, instance_type, instance_id):
+        """Retrieve the permissions for a project or batch
 
         Args:
             instance_type (str): Name of the type (project, batch)
-            instance_id (int): Id of the project or batch
+            instance_id (int): ID of the project or batch
 
         Returns:
             dict: representation of the permissions
@@ -408,7 +414,7 @@ class Permissions(ClientBase):
 
         Args:
             instance_type (str): Name of the type (project, batch)
-            instance_id (int): Id of the project or batch
+            instance_id (int): ID of the project or batch
             permissions (dict): Dictionary with keys 'users' and 'groups' for lists of ids
 
         Returns:
@@ -432,12 +438,3 @@ class Permissions(ClientBase):
         url = self._get_url(instance_type, instance_id)
         response = self._put(url, permissions)
         return response.json()
-
-    def list(self):
-        raise NotImplementedError()
-
-    def create(self, instance):
-        raise NotImplementedError()
-
-    def retrieve(self, instance_id):
-        raise NotImplementedError()
