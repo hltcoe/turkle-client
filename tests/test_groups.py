@@ -17,14 +17,13 @@ my_vcr = vcr.VCR(
 def test_retrieve():
     # Turkle creates an admin group on installation so 2 = Group1
     client = Groups(url, token)
-    text = client.retrieve(2)
-    assert 'Group1' in text
+    group = client.retrieve(2)
+    assert group['name'] == 'Group1'
 
 @my_vcr.use_cassette()
 def test_retrieve_by_name():
     client = Groups(url, token)
-    text = client.retrieve_by_name("Group1")
-    groups = json.loads(text)
+    groups = client.retrieve_by_name("Group1")
     assert len(groups) == 1
     assert groups[0]['name'] == "Group1"
 
@@ -37,6 +36,5 @@ def test_retrieve_on_bad_group():
 @my_vcr.use_cassette()
 def test_add_users():
     client = Groups(url, token)
-    text = client.addusers(2, [5, 6])
-    group = json.loads(text)
+    group = client.add_users(2, [5, 6])
     assert len(group['users']) == 4

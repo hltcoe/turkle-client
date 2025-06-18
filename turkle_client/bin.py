@@ -175,7 +175,9 @@ class Cli:
 
         # construct the class and method from the command and subcommand
         client = self.construct_client(args.command.capitalize(), url, token, self.debug)
-        print(getattr(client, args.subcommand)(**vars(args)), end='')
+        result = getattr(client, args.subcommand)(**vars(args))
+        if isinstance(result, dict):
+            print(json.dumps(result))
 
     def construct_client(self, name, url, token, debug):
         # the wrapper handles interactions requiring multiple calls

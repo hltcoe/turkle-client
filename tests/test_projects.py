@@ -16,8 +16,7 @@ my_vcr = vcr.VCR(
 @my_vcr.use_cassette()
 def test_batches():
     client = Projects(url, token)
-    text = client.batches(1)
-    batches = json.loads(text)
+    batches = client.batches(1)
     assert len(batches) == 1
     assert batches[0]['name'] == 'Dickens'
 

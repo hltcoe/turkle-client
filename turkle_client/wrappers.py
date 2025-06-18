@@ -62,9 +62,9 @@ class Wrapper:
 class UsersWrapper(Wrapper):
     def retrieve(self, id, username, **kwargs):
         if id:
-            return self.client.retrieve(id) + "\n"
+            return self.client.retrieve(id)
         elif username:
-            return self.client.retrieve_by_username(username) + "\n"
+            return self.client.retrieve_by_username(username)
         else:
             raise TurkleClientException("--id or --username must be set for 'users retrieve'")
 
@@ -98,7 +98,7 @@ class UsersWrapper(Wrapper):
 class GroupsWrapper(Wrapper):
     def retrieve(self, id, name, **kwargs):
         if id:
-            return self.client.retrieve(id) + "\n"
+            return self.client.retrieve(id)
         elif name:
             return self.client.retrieve_by_name(name)
         else:
@@ -136,7 +136,7 @@ class ProjectsWrapper(Wrapper):
     def retrieve(self, id, **kwargs):
         if not id:
             raise TurkleClientException("--id must be set for 'projects retrieve'")
-        return self.client.retrieve(id) + "\n"
+        return self.client.retrieve(id)
 
     def create(self, file, **kwargs):
         if not file:
@@ -182,7 +182,7 @@ class BatchesWrapper(Wrapper):
     def retrieve(self, id, **kwargs):
         if not id:
             raise TurkleClientException("--id must be set for 'batches retrieve'")
-        return self.client.retrieve(id) + "\n"
+        return self.client.retrieve(id)
 
     def create(self, file, **kwargs):
         if not file:
@@ -225,7 +225,7 @@ class BatchesWrapper(Wrapper):
     def progress(self, id, **kwargs):
         if not id:
             raise TurkleClientException("--id must be set for 'batches progress'")
-        return self.client.progress(id) + "\n"
+        return self.client.progress(id)
 
     def results(self, id, **kwargs):
         if not id:

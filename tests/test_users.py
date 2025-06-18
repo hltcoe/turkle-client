@@ -16,14 +16,14 @@ my_vcr = vcr.VCR(
 @my_vcr.use_cassette()
 def test_retrieve():
     client = Users(url, token)
-    text = client.retrieve(1)
-    assert 'AnonymousUser' in text
+    user = client.retrieve(1)
+    assert user['username'] == 'AnonymousUser'
 
 @my_vcr.use_cassette()
 def test_retrieve_by_username():
     client = Users(url, token)
-    text = client.retrieve_by_username("user1")
-    assert 'Bob' in text
+    user = client.retrieve_by_username("user1")
+    assert user['first_name'] == 'Bob'
 
 @my_vcr.use_cassette()
 def test_retrieve_by_username_with_bad_username():
@@ -34,22 +34,19 @@ def test_retrieve_by_username_with_bad_username():
 @my_vcr.use_cassette()
 def test_list():
     client = Users(url, token)
-    text = client.list()
-    users = json.loads(text)
+    users = client.list()
     assert len(users) == 6
 
 @my_vcr.use_cassette()
 def test_create():
     client = Users(url, token)
-    text = client.create({'username': 'user5', 'password': '123456'})
-    user = json.loads(text)
+    user = client.create({'username': 'user5', 'password': '123456'})
     assert user['username'] == 'user5'
 
 @my_vcr.use_cassette()
 def test_update():
     client = Users(url, token)
-    text = client.update({'id': 3, 'first_name': 'Craig'})
-    user = json.loads(text)
+    user = client.update({'id': 3, 'first_name': 'Craig'})
     assert user['username'] == 'user1'
     assert user['first_name'] == 'Craig'
 

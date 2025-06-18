@@ -20,5 +20,5 @@ def test_retrieve_on_bad_project():
 @my_vcr.use_cassette()
 def test_update_with_not_allowed_csv():
     client = Batches(url, token)
-    with pytest.raises(TurkleClientException, match="Cannot update the csv data using update. Use addtasks"):
+    with pytest.raises(TurkleClientException, match="Cannot update the csv data using update. Use add_tasks"):
         client.update({'id': 1, 'csv_text': 'test,test2\n1,2'})
