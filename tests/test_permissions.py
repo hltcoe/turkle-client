@@ -38,3 +38,35 @@ def test_retrieve_for_empty_permissions():
     assert len(perms) == 2
     assert len(perms['users']) == 0
     assert len(perms['groups']) == 0
+
+@my_vcr.use_cassette()
+def test_add():
+    client = Permissions(url, token)
+    perms = client.add("project", 1, {
+        'users': [3, 4],
+        'groups': [1]
+    })
+    assert len(perms) == 2
+    assert len(perms['users']) == 2
+    assert len(perms['groups']) == 3
+    # return to starting permissions
+    client.replace("project", 1, {
+        'users': [],
+        'groups': [2, 3]
+    })
+
+@my_vcr.use_cassette()
+def test_replace():
+    client = Permissions(url, token)
+    perms = client.replace("project", 1, {
+        'users': [3, 4],
+        'groups': [2]
+    })
+    assert len(perms) == 2
+    assert len(perms['users']) == 2
+    assert len(perms['groups']) == 1
+    # return to starting permissions
+    client.replace("project", 1, {
+        'users': [],
+        'groups': [2, 3]
+    })

@@ -1,5 +1,7 @@
 # preload a clean site with objects for testing
 # 2 users already exist before this runs (anonymous and the first admin)
+# this is to make it easier to use vcr for repeatable tests.
+# saves us from having to do a lot of mocking
 import argparse
 import os
 import sys
@@ -69,6 +71,10 @@ def add_permissions(base_url, token):
     client.add("project", 1, {
         'users': [],
         'groups': [2, 3]
+    })
+    client.add("project", 2, {
+        'users': [5],
+        'groups': [1]
     })
 
 
