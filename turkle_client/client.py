@@ -7,7 +7,7 @@ import requests
 from .exceptions import TurkleClientException
 
 
-class Client:
+class ClientBase:
     """
     Base client for Turkle REST API
 
@@ -132,7 +132,7 @@ class Client:
                 raise TurkleClientException(f"{parts[0]} - {parts[1][0]}")
 
 
-class Users(Client):
+class Users(ClientBase):
     class Urls:
         list = "{base}/api/users/"
         detail = "{base}/api/users/{id}/"
@@ -181,7 +181,7 @@ class Users(Client):
         return response.text
 
 
-class Groups(Client):
+class Groups(ClientBase):
     class Urls:
         list = "{base}/api/groups/"
         detail = "{base}/api/groups/{id}/"
@@ -216,7 +216,7 @@ class Groups(Client):
         return response.text
 
 
-class Projects(Client):
+class Projects(ClientBase):
     class Urls:
         list = "{base}/api/projects/"
         detail = "{base}/api/projects/{id}/"
@@ -261,7 +261,7 @@ class Projects(Client):
         return self._walk(url)
 
 
-class Batches(Client):
+class Batches(ClientBase):
     class Urls:
         list = "{base}/api/batches/"
         detail = "{base}/api/batches/{id}/"
@@ -352,7 +352,7 @@ class Batches(Client):
         return response.text
 
 
-class Permissions(Client):
+class Permissions(ClientBase):
     class Urls:
         projects = "{base}/api/projects/{id}/permissions/"
         batches = "{base}/api/batches/{id}/permissions/"
