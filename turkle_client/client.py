@@ -112,7 +112,7 @@ class ClientBase:
             else:
                 # grab the first error
                 parts = next(iter(data.items()))
-                raise TurkleClientException(f"{parts[0]} - {parts[1][0]}")
+                raise TurkleClientException(f"{parts[0]} - {parts[1]}")
 
 
 class CrudMixin:
@@ -294,6 +294,7 @@ class Batches(CrudMixin, ClientBase):
         input = "{base}/api/batches/{id}/input/"
         results = "{base}/api/batches/{id}/results/"
         progress = "{base}/api/batches/{id}/progress/"
+        tasks = "{base}/api/batches/{id}/tasks/"
 
     def create(self, batch):
         """Create a batch
@@ -336,7 +337,11 @@ class Batches(CrudMixin, ClientBase):
         Returns:
             dict: updated batch
         """
-        raise NotImplementedError()
+        if set(batch.keys()) != {'id', 'csv_text'}:
+            raise TurkleClientException("add_tasks requires 'id' and 'csv_text'")
+        url = self.Urls.tasks.format(base=self.base_url, id=batch['id'])
+        response = self._post(url, batch)
+        return response.json()
 
     def input(self, batch_id):
         """Get the input CSV for the batch

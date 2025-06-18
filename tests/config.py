@@ -1,2 +1,2 @@
-token = "f07970f29933104f30042982157b3e6b0fdac758"
+token = "6fb9054827c24fa57612608422122a3a1ddeff7d"
 url = "http://localhost:8000/"
