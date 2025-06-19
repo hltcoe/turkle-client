@@ -131,6 +131,11 @@ turkle-client batches input --id 17
 turkle-client batches results --id 17
 ```
 
+Adding tasks to a batch can be done by passing the path to a csv file:
+```
+turkle-client batches add_tasks --id 3 --file new_tasks.csv
+```
+
 ### Permissions
 Projects and batches can be limited to certain users or groups.
 These permissions can be retrieved, added to, and replaced.

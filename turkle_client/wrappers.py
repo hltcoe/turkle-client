@@ -217,6 +217,21 @@ class BatchesWrapper(Wrapper):
 
         return f"{plural(lineno, 'batch', 'batches')} updated"
 
+    def add_tasks(self, id, file, **kwargs):
+        if not id:
+            raise TurkleClientException("--id must be set for 'batches add_tasks'")
+        if not file:
+            raise TurkleClientException("--file must be set for 'batches add_tasks'")
+
+        with open(file, 'r') as csv_fh:
+            batch = {
+                'id': id,
+                'csv_text': csv_fh.read()
+            }
+            self.client.add_tasks(batch)
+            stats = self.client.progress(id)
+            return f"Batch now has {stats['total_tasks']} tasks"
+
     def input(self, id, **kwargs):
         if not id:
             raise TurkleClientException("--id must be set for 'batches input'")

@@ -40,11 +40,12 @@ update    Update projects
 batches   List batches for a project
 """
 
-batches_choices = ['list', 'create', 'retrieve', 'update', 'input', 'results', 'progress']
+batches_choices = ['list', 'create', 'retrieve', 'update', 'add_tasks', 'input', 'results', 'progress']
 batches_help = """list      List all batches as jsonl
 create    Create new batches
 retrieve  Retrieve a batch based on integer identifier
 update    Update batches
+add_tasks Add tasks to a batch
 input     Download the input CSV
 results   Download the current results CSV
 progress  Get current progress information
@@ -110,7 +111,7 @@ class Cli:
         self.update_title(projects_parser)
         projects_parser.add_argument('subcommand', choices=projects_choices, help=projects_help)
         projects_parser.add_argument('--id', help='Project id - required for retrieve and batches')
-        projects_parser.add_argument('--file', help='json/jsonl file - required for create or update')
+        projects_parser.add_argument('--file', help='json/jsonl/csv file - required for create, update, add_tasks')
 
         batches_parser = subparsers.add_parser(
             'batches',
