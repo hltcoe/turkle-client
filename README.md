@@ -173,6 +173,42 @@ new_user = client.users.create({
 })
 ```
 
+### Dynamic Batches
+Normally, batches are fixed when they are created, but the API adds support
+for adding tasks.
+A dictionary with the batch id and a string with the csv fields including headers
+are passed to `add_tasks()`:
+```
+with open(file_path, 'r') as file:
+    csv_content = file.read()
+    client.batches.add_tasks({
+        'id': batch_id,
+        'csv_text': csv_content
+    })
+```
+
+The library provides a `BatchMonitor` that could support an active learning workflow.
+It polls the `progress` function of a batch and returns when a goal has been reached:
+```
+def goal_fn(progress):
+    percent = progress["total_finished_tasks"] / progress["total_tasks"]
+    return percent > 0.75
+
+def on_goal_reached(progress):
+    # add additional tasks here
+    print("Batch is 75% complete")
+
+monitor = tc.BatchMonitor(
+    client=client,
+    batch_id=3,
+    goal_fn=goal_fn,
+    callback_fn=on_goal_reached,
+    interval=10
+)
+
+monitor.wait()
+```
+
 ## Developers
 
 ### Installing
