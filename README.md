@@ -56,6 +56,16 @@ turkle-client users create --file new_users.csv
 ```
 The create command also accepts jsonl files.
 
+Updating a user requires a json object with the id of the user and then
+any fields that you want to change:
+```
+{"id": 5, "email": "my_new_addr@example.org"}
+```
+and is passed to the command using the file argument:
+```
+turkle-client users update --file user_update.json
+```
+
 ### Groups
 List groups with:
 ```
@@ -119,6 +129,19 @@ Getting the progress, the input csv or the results csv all work the same way:
 turkle-client batches progress --id 17
 turkle-client batches input --id 17
 turkle-client batches results --id 17
+```
+
+### Permissions
+Projects and batches can be limited to certain users or groups.
+These permissions can be retrieved, added to, and replaced.
+The dictionary to add or replace permissions looks like this:
+```
+{"users": [2, 3], "groups": []}
+```
+All the methods require a project or batch id passed with `--pid` or `--bid`.
+The add and replace methods require an additional file argument:
+```
+turkle-client permissions replace --pid 4 --file new_perms.json
 ```
 
 ## Developers
