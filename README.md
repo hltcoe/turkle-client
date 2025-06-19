@@ -1,6 +1,7 @@
 # Turkle Client
 This is a client for the [Turkle](https://github.com/hltcoe/turkle) annotation platform.
 It provides a commandline interface to create and work with users, groups, projects and batches.
+There is also a client library for building utilities to interact with Turkle.
 
 ## Install
 Install from pip:
@@ -8,7 +9,7 @@ Install from pip:
 pip install turkle-client
 ```
 
-## Usage
+## CLI Usage
 The commandline client works similar to tools like git where there is a hierarchy
 of commands. The top level commands are config, users, groups, projects, and batches.
 Each has sub-commands like retrieve, create, or update.
@@ -147,6 +148,29 @@ All the methods require a project or batch id passed with `--pid` or `--bid`.
 The add and replace methods require an additional file argument:
 ```
 turkle-client permissions replace --pid 4 --file new_perms.json
+```
+
+## Library
+The library is primarily a wrapper around the REST API of Turkle.
+To use it, import the `Client` class and pass the url of the site and a token
+to initialize it.
+```
+import turkle_client as tc
+
+client = tc.Client("https://example.org", "abcdefghijkl")
+```
+Each section of the API (users, groups, projects, batches, and permissions)
+has its own object available from the client:
+```
+users = client.users.list()
+```
+The client methods expect json dictionaries as input.
+To create a new user, pass a dictionary with at least a username and password:
+```
+new_user = client.users.create({
+    "username": "testuser",
+    "password": "password"
+})
 ```
 
 ## Developers
