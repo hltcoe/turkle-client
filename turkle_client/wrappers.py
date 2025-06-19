@@ -79,7 +79,7 @@ class UsersWrapper(Wrapper):
         except TurkleClientException as e:
             raise TurkleClientException(f"Failure on line {lineno} in {file}: {e}")
 
-        return f"{plural(lineno, 'user', 'users')} created\n"
+        return f"{plural(lineno, 'user', 'users')} created"
 
     def update(self, file, **kwargs):
         if not file:
@@ -92,7 +92,7 @@ class UsersWrapper(Wrapper):
         except TurkleClientException as e:
             raise TurkleClientException(f"Failure on line {lineno} in {file}: {e}")
 
-        return f"{plural(lineno, 'user', 'users')} updated\n"
+        return f"{plural(lineno, 'user', 'users')} updated"
 
 
 class GroupsWrapper(Wrapper):
@@ -115,21 +115,21 @@ class GroupsWrapper(Wrapper):
         except TurkleClientException as e:
             raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
 
-        return f"{plural(lineno, 'group', 'groups')} created\n"
+        return f"{plural(lineno, 'group', 'groups')} created"
 
-    def addusers(self, id, file, **kwargs):
+    def add_users(self, id, file, **kwargs):
         # file contains json encoded list of user ids
         if not id:
-            raise ValueError("--id must be set for 'groups addusers'")
+            raise ValueError("--id must be set for 'groups add_users'")
         if not file:
-            raise ValueError("--file must be set for 'groups addusers'")
+            raise ValueError("--file must be set for 'groups add_users'")
 
         try:
             user_ids = next(load_records(file, [".json"]))
-            self.client.addusers(id, user_ids)
+            self.client.add_users(id, user_ids)
         except TurkleClientException as e:
             raise TurkleClientException(f"Failure in {file}: {e}")
-        return f"{plural(len(user_ids), 'user', 'users')} added to the group\n"
+        return f"{plural(len(user_ids), 'user', 'users')} added to the group"
 
 
 class ProjectsWrapper(Wrapper):
@@ -153,7 +153,7 @@ class ProjectsWrapper(Wrapper):
         except TurkleClientException as e:
             raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
 
-        return f"{plural(lineno, 'project', 'projects')} created\n"
+        return f"{plural(lineno, 'project', 'projects')} created"
 
     def update(self, file, **kwargs):
         if not file:
@@ -170,7 +170,7 @@ class ProjectsWrapper(Wrapper):
         except TurkleClientException as e:
             raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
 
-        return f"{plural(lineno, 'project', 'projects')} updated\n"
+        return f"{plural(lineno, 'project', 'projects')} updated"
 
     def batches(self, id, **kwargs):
         if not id:
@@ -198,7 +198,7 @@ class BatchesWrapper(Wrapper):
         except TurkleClientException as e:
             raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
 
-        return f"{plural(lineno, 'batch', 'batches')} created\n"
+        return f"{plural(lineno, 'batch', 'batches')} created"
 
     def update(self, file, **kwargs):
         if not file:
@@ -215,7 +215,7 @@ class BatchesWrapper(Wrapper):
         except TurkleClientException as e:
             raise TurkleClientException(f"Failure on object {lineno} in {file}: {e}")
 
-        return f"{plural(lineno, 'batch', 'batches')} updated\n"
+        return f"{plural(lineno, 'batch', 'batches')} updated"
 
     def input(self, id, **kwargs):
         if not id:
@@ -243,8 +243,7 @@ class PermissionsWrapper(Wrapper):
     def retrieve(self, pid, bid, **kwargs):
         if not pid and not bid:
             raise TurkleClientException("--pid or --bid is required for 'permissions retrieve'")
-        text = self.client.get(*self._prepare_args(pid, bid))
-        return text + "\n"
+        return self.client.retrieve(*self._prepare_args(pid, bid))
 
     def add(self, pid, bid, file, **kwargs):
         if not pid and not bid:
@@ -253,8 +252,7 @@ class PermissionsWrapper(Wrapper):
             raise ValueError("--file must be set for 'permissions add'")
         with open(file, 'r') as fh:
             data = json.load(fh)
-            text = self.client.add(*self._prepare_args(pid, bid), data)
-            return text + "\n"
+            return self.client.add(*self._prepare_args(pid, bid), data)
 
     def replace(self, pid, bid, file, **kwargs):
         if not pid and not bid:
@@ -263,5 +261,4 @@ class PermissionsWrapper(Wrapper):
             raise ValueError("--file must be set for 'permissions replace'")
         with open(file, 'r') as fh:
             data = json.load(fh)
-            text = self.client.replace(*self._prepare_args(pid, bid), data)
-            return text + "\n"
+            return self.client.replace(*self._prepare_args(pid, bid), data)

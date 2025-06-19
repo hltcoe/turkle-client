@@ -25,11 +25,11 @@ retrieve  Retrieve a user selected by a username or integer identifier
 update    Update users
 """
 
-groups_choices = ['list', 'create', 'retrieve', 'addusers']
+groups_choices = ['list', 'create', 'retrieve', 'add_users']
 groups_help = """list      List all groups as jsonl
 create    Create new groups
 retrieve  Retrieve a group selected by name or integer identifier
-addusers  Add users to an existing group by passing their ids as list in file
+add_users  Add users to an existing group by passing their ids as list in file
 """
 
 projects_choices = ['list', 'create', 'retrieve', 'update', 'batches']
@@ -131,7 +131,7 @@ class Cli:
         perm_parser.add_argument('subcommand', choices=perm_choices, help=perm_help)
         perm_parser.add_argument('--pid', help='Project id')
         perm_parser.add_argument('--bid', help='Batch id')
-        perm_parser.add_argument('--file', help='Jsonl file - required for add or replace')
+        perm_parser.add_argument('--file', help='json,jsonl file - required for add or replace')
 
     @staticmethod
     def update_title(parser, title='Subcommand'):
@@ -176,7 +176,9 @@ class Cli:
         # construct the class and method from the command and subcommand
         client = self.construct_client(args.command.capitalize(), url, token, self.debug)
         result = getattr(client, args.subcommand)(**vars(args))
-        if isinstance(result, dict):
+        if isinstance(result, str):
+            print(result)
+        else:
             print(json.dumps(result))
 
     def construct_client(self, name, url, token, debug):
