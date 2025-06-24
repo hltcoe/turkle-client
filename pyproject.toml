@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=64", "wheel", "requests>=2"]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "turkle-client"
+version = "0.4.0"
 description = "Client for the Turkle REST API"
 readme = "README.md"
 license = { text = "BSD" }
 requires-python = ">=3.7"
-dynamic = ["version"]
 authors = [
   { name = "Cash Costello", email = "cash.costello@gmail.com" }
 ]
@@ -31,6 +31,8 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Operating System :: OS Independent"
 ]
+[project.urls]
+Homepage = "https://github.com/hltcoe/turkle-client"
 
 [project.optional-dependencies]
 dev = [
@@ -45,9 +47,6 @@ packages = ["turkle_client"]
 
 [tool.setuptools.package-data]
 "turkle_client" = ["*"]
-
-[tool.setuptools.dynamic]
-version = {attr = "turkle_client.__version__"}
 
 [project.scripts]
 turkle-client = "turkle_client.bin:main"
