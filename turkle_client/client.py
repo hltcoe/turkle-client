@@ -350,6 +350,7 @@ class Batches(CrudMixin, ClientBase):
         """
         url = self.Urls.input.format(base=self.base_url, id=batch_id)
         response = self._get(url)
+        response.encoding = 'utf-8'
         return response.text
 
     def results(self, batch_id):
@@ -363,6 +364,7 @@ class Batches(CrudMixin, ClientBase):
         """
         url = self.Urls.results.format(base=self.base_url, id=batch_id)
         response = self._get(url)
+        response.encoding = 'utf-8'
         return response.text
 
     def progress(self, batch_id):
